@@ -111,7 +111,12 @@ export default function Chat() {
             .upload(fileName, file)
 
         if (data) {
-            console.log(data.path);
+            const { data } = await supabaseClient.storage
+            .from('documents')
+            .getPublicUrl(fileName)
+            setUrl({publicUrl: data.publicUrl})
+
+            return
         }
     };
 
