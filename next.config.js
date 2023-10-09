@@ -14,5 +14,6 @@ module.exports = {
   },
   experimental: {
     serverActions: true,
+    serverComponentsExternalPackages: ["pdf-parse"],
   }
-};
+}

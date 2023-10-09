@@ -1,49 +1,34 @@
 'use client';
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import '@/styles/auth.css'
+import { Input, Button } from "@nextui-org/react";
 
-import Logo from '@/public/Brandstrat.png'
+import Logo from '@/public/Brandstrat.png';
 
 export default function SignUp() {
     const router = useRouter();
     const supabase = createClientComponentClient();
-    const [action, setAction] = useState("SignUp");
+    const [isVisible, setIsVisible] = useState(false);
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    const handleSignUp = async () => {
-        try {
-            const { error } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                    emailRedirectTo: `${location.origin}/auth/callback`,
-                },
-            });
-            if (!error) {
-                console.log("Sign up successful!");
-                router.push("/auth/callback");
-            } else {
-                console.log("Sign up error:", error.message);
-            }
-        } catch (error: any) {
-            console.error("Sign up error:", error.message);
-        }
+    const toggleVisibility = () => {
+        setIsVisible(!isVisible);
     }
 
     const handleSignIn = async () => {
         try {
-            const { error } = await supabase.auth.signInWithPassword({
+            const { data, error } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             });
             if (!error) {
                 console.log("Sign in successful!");
                 router.push("/auth/callback");
+                router.refresh()
             } else {
                 console.log("Sign in error:", error.message);
             }
@@ -52,71 +37,75 @@ export default function SignUp() {
         }
     }
 
-    const toggleAction = () => {
-        setAction(action === "SignUp" ? "SignIn" : "SignUp");
-    }
+
 
     return (
-        <div className="login-container">
-            <div className="left-side">
-                <div className="header">
-                    <span>BRANDSTRAT CHAT BOT</span>
+        <nav className="w-screen h-screen flex flex-row items-center justify-center">
+
+            <div className="w-1/2 h-full flex flex-col items-center justify-center bg-white">
+
+                <div className="w-full h-1/6 px-8 flex items-center">
+                    <span className="text-xl font-semibold text-gray-500 cursor-default">Brandstrat</span>
                 </div>
-                <div className="content">
-                    <div className="header">
-                        <span>{action === "SignUp" ? "Registrarse" : "Iniciar sesión"}</span>
-                        <p>{action === "SignUp" ? "Crea una cuenta para acceder a la plataforma" : "Ingresa a tu cuenta para acceder a la plataforma"}</p>
+
+                <div className="w-full h-full flex flex-col items-center justify-center gap-4">
+
+                    <div className="header cursor-default">
+                        <span className="text-2xl font-bold">Iniciar sesión</span>
+                        <p className="text-md text-gray-500">Ingresa a tu cuenta para acceder a la plataforma</p>
                     </div>
-                    <div className="form">
-                        <div className="input">
-                            <label>Correo electrónico</label>
-                            <input type="text" value={email} onChange={e => setEmail(e.target.value)} />
-                        </div>
-                        <div className="input">
-                            <label>Contraseña</label>
-                            <input type="password" value={password} onChange={e => setPassword(e.target.value)} />
-                        </div>
-                        <div className="button">
-                            <button onClick={action === "SignUp" ? handleSignUp : handleSignIn}>{action === "SignUp" ? "Registrarse" : "Iniciar sesión"}</button>
-                        </div>
+
+                    <div className="w-80 h-auto flex flex-col gap-2">
+
+                        <Input
+                            isClearable
+                            type="email"
+                            label="Correo electrónico"
+                            variant="bordered"
+                            defaultValue=""
+                            onClear={() => console.log("input cleared")}
+                            className="max-h-12"
+                            radius="sm"
+                            onChange={e => setEmail(e.target.value)}
+                            autoComplete='off'
+                        />
+
+                        <Input
+                            label="Contraseña"
+                            variant="bordered"
+                            endContent={
+                                <button className="focus:outline-none" type="button" onClick={toggleVisibility}>
+                                    {/* {isVisible ? (
+            <EyeSlashFilledIcon className="text-2xl text-default-400 pointer-events-none" />
+        ) : (
+            <EyeFilledIcon className="text-2xl text-default-400 pointer-events-none" />
+          )} */}
+                                </button>
+                            }
+                            type={isVisible ? "text" : "password"}
+                            className="max-h-12"
+                            radius="sm"
+                            onChange={e => setPassword(e.target.value)}
+                        />
+
+                        <Button className="bg-black text-white text-md font-semibold hover:bg-[#1A7F56] rounded-md" onClick={handleSignIn}>Iniciar sesión</Button>
+
                     </div>
-                    <div className="alternative">
-                        <span>{action === "SignUp" ? "¿Ya tienes una cuenta?" : "¿No tienes una cuenta?"}</span>
-                        <p onClick={toggleAction}>{action === "SignUp" ? "Inicia sesión" : "Regístrate"}</p>
-                    </div>
+
+                    <span className="text-md text-gray-500 cursor-pointer hover:text-black">¿Olvidaste tu contraseña?</span>
+
                 </div>
-                <div className="footer">
-                    <span>© Brandstrat 2023</span>
+
+                <div className="w-full h-1/6 flex items-center justify-center cursor-default">
+                    <span className="font-bold">© Brandstrat 2023</span>
                 </div>
+
             </div>
-            <div className="right-side">
-                <Image src={Logo} alt="Logo" />
+
+            <div className="w-1/2 h-full border-2 flex items-center justify-center">
+                <Image src={Logo} alt="Logo" className="w-1/2"/>
             </div>
-        </div>
-    );
-}
 
-export function SignOut() {
-    const router = useRouter();
-    const supabase = createClientComponentClient();
-
-    const handleSignOut = async () => {
-        try {
-            const { error } = await supabase.auth.signOut();
-            if (!error) {
-                console.log("Sign out successful!");
-                router.push("/auth");
-            } else {
-                console.log("Sign out error:", error.message);
-            }
-        } catch (error: any) {
-            console.error("Sign out error:", error.message);
-        }
-    }
-
-    return (
-        <div className="button">
-            <button onClick={handleSignOut}>Cerrar sesión</button>
-        </div>
+        </nav>
     );
 }
