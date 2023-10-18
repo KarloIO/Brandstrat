@@ -18,3 +18,19 @@
     background-color: #FFF;
     border-radius: 4px;
 }
+
+.file.active {
+    filter: brightness(0) saturate(100%) invert(53%) sepia(35%) saturate(1570%) hue-rotate(350deg) brightness(96%) contrast(95%);
+}
+
+.delete.active {
+    filter: brightness(0) saturate(100%) invert(94%) sepia(35%) saturate(684%) hue-rotate(309deg) brightness(98%) contrast(100%);
+}
+
+.delete.active:hover {
+    filter: brightness(0) saturate(100%) invert(53%) sepia(35%) saturate(1570%) hue-rotate(350deg) brightness(96%) contrast(95%);
+}
+
+.delete:hover {
+    filter: brightness(0) saturate(100%) invert(64%) sepia(7%) saturate(907%) hue-rotate(190deg) brightness(88%) contrast(88%);
+}

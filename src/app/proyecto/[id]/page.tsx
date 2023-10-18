@@ -388,6 +388,15 @@ export default function Chat() {
 
                                                 </div>
 
+                                                <div className="border-[#8A90A7] border-dashed border-1 rounded-md w-full h-auto max-h-[54px] flex flex-row items-center">
+
+                                                        <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-[48px] border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                                                                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Haz clic para subir</span> o arrastra y suelta</p>
+                                                            <input id="dropzone-file" type="file" className="hidden" />
+                                                        </label>
+
+                                                </div>
+
                                             </div>
                                         </div>
 
