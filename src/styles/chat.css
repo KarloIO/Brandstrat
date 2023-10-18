@@ -34,3 +34,7 @@
 .delete:hover {
     filter: brightness(0) saturate(100%) invert(64%) sepia(7%) saturate(907%) hue-rotate(190deg) brightness(88%) contrast(88%);
 }
+
+.divider {
+    background-color: #EFF0F3;
+}

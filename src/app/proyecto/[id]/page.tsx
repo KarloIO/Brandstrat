@@ -14,7 +14,7 @@ import link from '@/public/icons/link.svg';
 import wand from '@/public/icons/wand.svg';
 import wWand from '@/public/icons/white-wand.svg';
 import forward from '@/public/icons/forward.svg';
-import file from '@/public/icons/file.svg';
+import fileIcon from '@/public/icons/file.svg';
 import deleteIcon from '@/public/icons/delete.svg'
 
 
@@ -89,10 +89,11 @@ export default function Chat() {
     const [data, setData] = useState("");
     const [message, setMessage] = useState("");
     const messagesContainerRef = useRef<HTMLDivElement>(null);
-    const [isTableFinished, setTableFinished] = useState(false)
+    const [isTableFinished, setTableFinished] = useState(true)
     const [tooltipContent, setTooltipContent] = useState('Copiar URL');
     const [projects, setProjects] = useState<Project[]>([])
     const [filesOpen, setFilesOpen] = useState(false)
+    const [files, setFiles] = useState<File[]>([]);
 
     const handleMessageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setInputValue(event.target.value);
@@ -216,6 +217,18 @@ export default function Chat() {
         setFilesOpen(!filesOpen)
     }
 
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files) {
+            const file = event.target.files[0];
+            setFiles(oldFiles => [...oldFiles, file]);
+            event.target.value = '';
+        }
+    };
+
+    const handleFileDelete = (fileIndex: any) => {
+        setFiles(oldFiles => oldFiles.filter((file, index) => index !== fileIndex));
+    };
+
     return (
 
         <div className="w-screen h-auto flex flex-col items-center justify-start px-32">
@@ -287,7 +300,7 @@ export default function Chat() {
                     </div>
                 )}
 
-                <div className="w-full h-auto bg-white p-5 flex flex-row justify-between rounded-lg border-x-1 border-t-1 border-b-2 border-[#E0E0E0]">
+                <div className="w-full h-auto bg-white p-5 flex flex-row justify-between items-center rounded-lg border-x-1 border-t-1 border-b-2 border-[#E0E0E0]">
 
                     <div className="w-auto h-auto flex flex-col gap-1 items-start justify-start cursor-default">
 
@@ -297,23 +310,23 @@ export default function Chat() {
 
                     </div>
 
-                    <div className="w-auto h-full flex flex-row gap-5 items-center">
+                    <div className="w-auto h-full flex flex-row gap-5 items-center justify-center">
 
-                        <div className="flex flex-col gap-1 items-start justify-start">
+                        <div className="flex flex-col gap-0 items-start justify-start">
 
                             <span className="font-bold text-base text-[#EF7A17] cursor-pointer" onClick={handleFilesOpen}>Archivos</span>
 
-                            <span className="font-medium text-base text-[#8A90A7] cursor-default">Inspeccionar Carpeta</span>
+                            <span className="font-normal text-base text-[#8A90A7] cursor-default">Inspeccionar Carpeta</span>
 
                         </div>
 
-                        <Divider orientation="vertical" className="h-3/4 w-0.5 bg-[#EFF0F3]" />
+                        <Divider orientation="vertical" className="divider h-[38px] w-[2px] rounded" />
 
-                        <div className="flex flex-col gap-1 items-start justify-start">
+                        <div className="flex flex-col gap-0 items-start justify-start">
 
                             <span className="font-bold text-base text-[#EF7A17] cursor-pointer">Preguntas</span>
 
-                            <span className="font-medium text-base text-[#8A90A7] cursor-default">Inspeccionar Carpeta</span>
+                            <span className="font-normal text-base text-[#8A90A7] cursor-default">Inspeccionar Carpeta</span>
 
                         </div>
 
@@ -346,7 +359,7 @@ export default function Chat() {
 
                                                     <div className="w-full flex flex-row items-center justify-start gap-2">
 
-                                                        <Image src={file} alt="file" width={24} height={24} className="file active" />
+                                                        <Image src={fileIcon} alt="file" width={24} height={24} className="file active" />
 
                                                         <div className="flex flex-col gap-0 p-0">
 
@@ -369,31 +382,25 @@ export default function Chat() {
 
                                             <div className="flex flex-col items-start justify-start gap-2">
 
-                                                <div className="border-[#8A90A7] border-2 rounded-md w-full h-auto max-h-[54px] flex flex-row px-2 py-1.5 items-center">
-
-                                                    <div className="w-full flex flex-row items-center justify-start gap-2">
-
-                                                        <Image src={file} alt="file" width={24} height={24} className="file" />
-
-                                                        <div className="flex flex-col gap-0 p-0">
-
-                                                            <span className="text-sm font-semibold text-[#8A90A7]">Nombre de Archivo</span>
-                                                            <span className="text-sm font-normal text-[#8A90A7]">Descripcion de Archivo</span>
-
+                                                {files.map((file, index) => (
+                                                    <div key={index} className="border-[#8A90A7] border-2 rounded-md w-full h-auto max-h-[54px] flex flex-row px-2 py-1.5 items-center">
+                                                        <div className="w-full flex flex-row items-center justify-start gap-2">
+                                                            <Image src={fileIcon} alt="file" width={24} height={24} className="file" />
+                                                            <div className="flex flex-col gap-0 p-0">
+                                                                <span className="text-sm font-semibold text-[#8A90A7]">{file.name}</span>
+                                                                <span className="text-sm font-normal text-[#8A90A7]">{(file.size / (1024*1024)).toFixed(2)} MB</span>
+                                                            </div>
                                                         </div>
-
+                                                        <Image src={deleteIcon} alt="delete file" width={24} height={24} className="delete cursor-pointer h-6" onClick={() => handleFileDelete(index)} />
                                                     </div>
+                                                ))}
 
-                                                    <Image src={deleteIcon} alt="delete file" width={24} height={24} className="delete cursor-pointer h-6" />
+                                                <div className="border-[#8A90A7] border-dashed border-2 rounded-md w-full h-auto max-h-[54px] flex flex-row items-center justify-center">
 
-                                                </div>
-
-                                                <div className="border-[#8A90A7] border-dashed border-1 rounded-md w-full h-auto max-h-[54px] flex flex-row items-center">
-
-                                                        <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-[48px] border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
-                                                                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Haz clic para subir</span> o arrastra y suelta</p>
-                                                            <input id="dropzone-file" type="file" className="hidden" />
-                                                        </label>
+                                                    <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-[48px] border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                                                        <p className="text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Haz clic para subir</span></p>
+                                                        <input id="dropzone-file" type="file" className="hidden" onChange={handleFileUpload} />
+                                                    </label>
 
                                                 </div>
 
