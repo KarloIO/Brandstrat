@@ -1,7 +1,7 @@
 'use client'
 import Image from "next/image";
 import React, { useState, useEffect, useRef } from "react";
-import { Avatar, Divider, Tooltip, Select, SelectItem, Input } from "@nextui-org/react";
+import { Avatar, Divider, Tooltip, Select, SelectItem, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from "@nextui-org/react";
 import { sendMessageToBot } from "@/pages/api/bot";
 import { useRouter, usePathname } from "next/navigation";
 import CheckSession from '@/lib/checkSession'
@@ -14,6 +14,8 @@ import link from '@/public/icons/link.svg';
 import wand from '@/public/icons/wand.svg';
 import wWand from '@/public/icons/white-wand.svg';
 import forward from '@/public/icons/forward.svg';
+import file from '@/public/icons/file.svg';
+import deleteIcon from '@/public/icons/delete.svg'
 
 
 type Message = {
@@ -51,7 +53,7 @@ type ChatModuleProps = {
 interface BotResponse {
     question: string;
     users: { [key: string]: string; };
-    answer: string; // Asegúrate de que 'answer' es del tipo correcto
+    answer: string;
 }
 
 interface Project {
@@ -61,19 +63,15 @@ interface Project {
 
 const ChatModule: React.FC<ChatModuleProps> = ({ hover, setHover, handleSendClick, inputValue, handleMessageChange }) => {
 
-    // const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    //     setInputValue(event.target.value);
-    // };
-
     return (
         <div className="w-[640px] h-auto rounded-lg bg-white p-3 flex justify-between border-x-1 border-t-1 border-b-2 border-[#E0E0E0]">
             <div className="w-4/5 h-full max-h-5 flex flex-row gap-2">
                 <Image src={wand} alt="wand" width={20} height={20} />
-                <input type="text" value={inputValue} placeholder="Haz una consulta..." onChange={handleMessageChange} className="bg-white w-full border-white focus:outline-none text-md font-medium text-[#999999] placeholder:text-[#999999]" />
+                <input type="text" value={inputValue} placeholder="Haz una consulta..." onChange={handleMessageChange} className="bg-white w-full border-white focus:outline-none text-md font-medium text-[#8A90A7] placeholder:text-[#8A90A7]" />
             </div>
             <div className="w-auto h-full max-h-5 flex flex-row gap-1 items-center cursor-pointer ease-in-out duration-200" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onClick={() => handleSendClick(inputValue)}>
                 <Image src={forward} alt="wand" width={20} height={20} className={hover ? "fill-current text-[#EF7A17] filter brightness-0 saturate-100% hue-rotate(360deg) invert(46%) sepia(86%) saturate(1146%) hue-rotate(356deg) brightness(101%) contrast(87%) duration-200" : "duration-200 fill-current"} />
-                <span className={hover ? "font-semibold text-sm text-black duration-200" : "font-semibold text-sm text-[#999999] duration-200"}>Enviar</span>
+                <span className={hover ? "font-semibold text-sm text-black duration-200" : "font-semibold text-sm text-[#8A90A7] duration-200"}>Enviar</span>
             </div>
         </div>
     );
@@ -89,12 +87,12 @@ export default function Chat() {
     const [timestamps, setTimestamps] = useState<{ sender: string; content: string; timestamp: string; }[]>([]);
     const [urlData, setUrl] = useState<UrlType>({ publicUrl: "" });
     const [data, setData] = useState("");
-    // const [sourceData, setSourceData] = useState<SourceDataItem[]>([]);
     const [message, setMessage] = useState("");
     const messagesContainerRef = useRef<HTMLDivElement>(null);
-    const [isTableFinished, setTableFinished] = useState(true)
+    const [isTableFinished, setTableFinished] = useState(false)
     const [tooltipContent, setTooltipContent] = useState('Copiar URL');
     const [projects, setProjects] = useState<Project[]>([])
+    const [filesOpen, setFilesOpen] = useState(false)
 
     const handleMessageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setInputValue(event.target.value);
@@ -157,6 +155,7 @@ export default function Chat() {
 
     useEffect(() => {
         fetchProjects()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const fetchProjects = async () => {
@@ -213,6 +212,10 @@ export default function Chat() {
     //     }
     // }, [urlData]);
 
+    const handleFilesOpen = () => {
+        setFilesOpen(!filesOpen)
+    }
+
     return (
 
         <div className="w-screen h-auto flex flex-col items-center justify-start px-32">
@@ -239,7 +242,7 @@ export default function Chat() {
 
                     </Tooltip>
 
-                    <div className="w-auto h-auto max-h-8 flex flex-row px-3 py-2 gap-1 items-center justify-start border-2 border-[#D76A0F] bg-[#D76A0F] rounded-lg hover:border-[#EF7A17] cursor-pointer" onClick={() => router.push('/')}>
+                    <div className="w-auto h-auto max-h-8 flex flex-row px-3 py-2 gap-1 items-center justify-start rounded-lg bg-[#EF7A17] cursor-pointer" onClick={() => router.push('/')}>
 
                         <span className='w-fit font-semibold text-white text-sm'>Comenzar</span>
 
@@ -290,7 +293,7 @@ export default function Chat() {
 
                         <h4 className="font-bold text-xl text-[#131315]">{projects[0]?.name}</h4>
 
-                        <span className="font-medium text-base text-[#999999]">{projects[0]?.description}</span>
+                        <span className="font-medium text-base text-[#8A90A7]">{projects[0]?.description}</span>
 
                     </div>
 
@@ -298,9 +301,9 @@ export default function Chat() {
 
                         <div className="flex flex-col gap-1 items-start justify-start">
 
-                            <span className="font-bold text-base text-[#EF7A17] cursor-pointer">Archivos</span>
+                            <span className="font-bold text-base text-[#EF7A17] cursor-pointer" onClick={handleFilesOpen}>Archivos</span>
 
-                            <span className="font-medium text-base text-[#999999] cursor-default">Inspeccionar Carpeta</span>
+                            <span className="font-medium text-base text-[#8A90A7] cursor-default">Inspeccionar Carpeta</span>
 
                         </div>
 
@@ -310,11 +313,92 @@ export default function Chat() {
 
                             <span className="font-bold text-base text-[#EF7A17] cursor-pointer">Preguntas</span>
 
-                            <span className="font-medium text-base text-[#999999] cursor-default">Inspeccionar Carpeta</span>
+                            <span className="font-medium text-base text-[#8A90A7] cursor-default">Inspeccionar Carpeta</span>
 
                         </div>
 
                     </div>
+
+                    <Modal
+                        backdrop="opaque"
+                        isOpen={filesOpen}
+                        onOpenChange={handleFilesOpen}
+                        classNames={{
+                            backdrop: "bg-gradient-to-t from-zinc-900 to-zinc-900/10 backdrop-opacity-20"
+                        }}
+                        className="w-full h-auto max-w-[464px] max-h-[600px] rounded-lg"
+                        isDismissable={false}
+                    >
+
+                        <ModalContent className="w-full h-auto">
+
+                            {(onClose) => (
+                                <div className="w-full h-full flex flex-col items-center justify-start gap-6 p-6">
+
+                                    <ModalBody className="w-full h-full flex flex-col items-center justify-start gap-6 p-0">
+
+                                        <div className="w-full h-full flex flex-col gap-2 cursor-default">
+                                            <span className=" font-bold text-xl text-[#31313A]">Archivos</span>
+
+                                            <div className="flex flex-col items-start justify-start gap-2">
+
+                                                <div className="border-[#EF7A17] border-2 rounded-md w-full h-auto max-h-[54px] flex flex-row px-2 py-1.5 items-center">
+
+                                                    <div className="w-full flex flex-row items-center justify-start gap-2">
+
+                                                        <Image src={file} alt="file" width={24} height={24} className="file active" />
+
+                                                        <div className="flex flex-col gap-0 p-0">
+
+                                                            <span className="text-sm font-semibold text-[#EF7A17]">Nombre de Archivo</span>
+                                                            <span className="text-sm font-normal text-[#EF7A17]">Descripcion de Archivo</span>
+
+                                                        </div>
+
+                                                    </div>
+
+                                                    <Image src={deleteIcon} alt="delete file" width={24} height={24} className="delete active cursor-pointer h-6" />
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        <div className="w-full h-full flex flex-col gap-2 cursor-default">
+                                            <span className=" font-bold text-xl text-[#31313A]">Pendientes de Subida</span>
+
+                                            <div className="flex flex-col items-start justify-start gap-2">
+
+                                                <div className="border-[#8A90A7] border-2 rounded-md w-full h-auto max-h-[54px] flex flex-row px-2 py-1.5 items-center">
+
+                                                    <div className="w-full flex flex-row items-center justify-start gap-2">
+
+                                                        <Image src={file} alt="file" width={24} height={24} className="file" />
+
+                                                        <div className="flex flex-col gap-0 p-0">
+
+                                                            <span className="text-sm font-semibold text-[#8A90A7]">Nombre de Archivo</span>
+                                                            <span className="text-sm font-normal text-[#8A90A7]">Descripcion de Archivo</span>
+
+                                                        </div>
+
+                                                    </div>
+
+                                                    <Image src={deleteIcon} alt="delete file" width={24} height={24} className="delete cursor-pointer h-6" />
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                    </ModalBody>
+
+                                </div>
+                            )}
+
+                        </ModalContent>
+
+                    </Modal>
 
                 </div>
 
