@@ -38,3 +38,35 @@
 .divider {
     background-color: #EFF0F3;
 }
+
+.archives::-webkit-scrollbar {
+    color: #FFF;
+    width: 8px;
+}
+
+.archives::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+.archives::-webkit-scrollbar-thumb {
+    background-color: #FBDBAD;
+    border-radius: 4px;
+}
+
+.pendings::-webkit-scrollbar {
+    color: #FFF;
+    width: 8px;
+}
+
+.pendings::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+.pendings::-webkit-scrollbar-thumb {
+    background-color: #dadce3;
+    border-radius: 4px;
+}
+
+.trashcontainer:hover .trash {
+        filter: brightness(0) saturate(100%) invert(100%) sepia(100%) saturate(1%) hue-rotate(127deg) brightness(102%) contrast(101%);
+}

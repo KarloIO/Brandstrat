@@ -71,6 +71,7 @@ export default function NavigationBar() {
         if (userIsLoggedIn === null) {
             router.push("/auth");
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
