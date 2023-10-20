@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react'
-import NavigationBar from '@/modules/navbar'
+// import NavigationBar from '@/modules/navbar'
 import Image from 'next/image'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure, Checkbox, Input, Link } from "@nextui-org/react";
 import CheckSession from '@/lib/checkSession'
@@ -73,7 +73,7 @@ export default function Home() {
 
     <main className='w-screen h-screen flex flex-col items-center justify-start'>
 
-      <NavigationBar />
+      {/* <NavigationBar /> */}
 
       <Modal
         isOpen={isOpen}
