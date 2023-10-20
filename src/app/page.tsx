@@ -23,18 +23,18 @@ export default function Home() {
   const [projectDescription, setProjectDescription] = useState('')
   const [projects, setProjects] = useState<Project[]>([])
 
-  useEffect(() => {
-    const checkUserSession = async () => {
-      const session = await CheckSession();
-      if (session.session == null) {
-        console.log("El usuario no está logueado");
-        router.push('/auth')
-      } else {
-        console.log("El usuario está logueado");
-      }
-    };
-    checkUserSession();
-  }, [router]);
+  // useEffect(() => {
+  //   const checkUserSession = async () => {
+  //     const session = await CheckSession();
+  //     if (session.session == null) {
+  //       console.log("El usuario no está logueado");
+  //       router.push('/auth')
+  //     } else {
+  //       console.log("El usuario está logueado");
+  //     }
+  //   };
+  //   checkUserSession();
+  // }, [router]);
 
   useEffect(() => {
     fetchProjects()
