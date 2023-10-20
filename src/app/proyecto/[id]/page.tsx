@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Avatar, Divider, Tooltip, Select, SelectItem, Progress, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, CircularProgress } from "@nextui-org/react";
 // import { sendMessageToBot } from "@/pages/api/bot";
 import { useRouter, usePathname } from "next/navigation";
-import CheckSession from '@/lib/checkSession'
+// import CheckSession from '@/lib/checkSession'
 import supabaseClient from '@/lib/supabase'
 import '@/styles/chat.css'
 
@@ -263,16 +263,16 @@ export default function Chat() {
         }, 4000);
     }
 
-    useEffect(() => {
-        const checkUserSession = async () => {
-            const session = await CheckSession();
-            if (session.session == null) {
-                console.log("El usuario no está logueado");
-                router.push('/auth')
-            }
-        };
-        checkUserSession();
-    }, [router]);
+    // useEffect(() => {
+    //     const checkUserSession = async () => {
+    //         const session = await CheckSession();
+    //         if (session.session == null) {
+    //             console.log("El usuario no está logueado");
+    //             router.push('/auth')
+    //         }
+    //     };
+    //     checkUserSession();
+    // }, [router]);
 
     const handleFilesOpen = () => {
         setFilesOpen(!filesOpen)
