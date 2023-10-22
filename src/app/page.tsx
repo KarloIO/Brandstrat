@@ -1,8 +1,8 @@
 'use client';
 import React, { useEffect, useState } from 'react'
-// import NavigationBar from '@/modules/navbar'
+import NavigationBar from '@/modules/navbar'
 import Image from 'next/image'
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure, Checkbox, Input, Link } from "@nextui-org/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure, Input } from "@nextui-org/react";
 import CheckSession from '@/lib/checkSession'
 import { useRouter } from 'next/navigation';
 import supabaseClient from '@/lib/supabase'
@@ -23,18 +23,18 @@ export default function Home() {
   const [projectDescription, setProjectDescription] = useState('')
   const [projects, setProjects] = useState<Project[]>([])
 
-  // useEffect(() => {
-  //   const checkUserSession = async () => {
-  //     const session = await CheckSession();
-  //     if (session.session == null) {
-  //       console.log("El usuario no está logueado");
-  //       router.push('/auth')
-  //     } else {
-  //       console.log("El usuario está logueado");
-  //     }
-  //   };
-  //   checkUserSession();
-  // }, [router]);
+  useEffect(() => {
+    const checkUserSession = async () => {
+      const session = await CheckSession();
+      if (session.session == null) {
+        console.log("El usuario no está logueado");
+        router.push('/auth')
+      } else {
+        console.log("El usuario está logueado");
+      }
+    };
+    checkUserSession();
+  }, [router]);
 
   useEffect(() => {
     fetchProjects()
@@ -73,7 +73,7 @@ export default function Home() {
 
     <main className='w-screen h-screen flex flex-col items-center justify-start'>
 
-      {/* <NavigationBar /> */}
+      <NavigationBar />
 
       <Modal
         isOpen={isOpen}
@@ -133,7 +133,7 @@ export default function Home() {
 
         </div>
 
-        <div className='w-full h-auto flex flex-row flex-wrap gap-3 justify-between'>
+        <div className='w-full h-auto flex flex-row flex-wrap justify-start gap-3'>
 
           {projects?.map((project) => (
             <div className='w-full max-w-[305px] h-auto bg-white border-x-1 border-t-1 border-b-2 border-[#E0E0E0] flex flex-col p-5 gap-3 rounded-lg' key={project.name}>

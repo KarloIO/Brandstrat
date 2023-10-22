@@ -1,10 +1,10 @@
 'use client'
 import Image from "next/image";
 import React, { useState, useEffect, useRef } from "react";
-import { Avatar, Divider, Tooltip, Select, SelectItem, Progress, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, CircularProgress } from "@nextui-org/react";
-// import { sendMessageToBot } from "@/pages/api/bot";
+import { Avatar, Divider, Tooltip, Select, SelectItem, Progress, Modal, ModalContent, ModalBody, Button, CircularProgress } from "@nextui-org/react";
+import { sendMessageToBot } from "@/pages/api/bot";
 import { useRouter, usePathname } from "next/navigation";
-// import CheckSession from '@/lib/checkSession'
+import CheckSession from '@/lib/checkSession'
 import supabaseClient from '@/lib/supabase'
 import '@/styles/chat.css'
 
@@ -110,54 +110,20 @@ export default function Chat() {
     const [isLoading, setIsLoading] = useState(false);
     const [loadMessage, setLoadMessage] = useState('Cargando archivos...');
 
-    const handleStartClick = () => {
+    const handleStartClick = async () => {
         setLoadModalVisible(true);
         setIsLoading(true);
-    
-        const fileNames = projects[0]?.files?.flat().map(file => file.name);
-    
-        if (fileNames && fileNames.length > 0) {
-            let i = 0;
-            const displayNextFileName = () => {
-                setLoadMessage(`Cargando archivo: ${fileNames[i]}`);
-                i++;
-                if (i < fileNames.length) {
-                    setTimeout(displayNextFileName, 5000); 
-                } else {
-                    setIsLoading(false);
-                    setLoadMessage('Error, no hay preguntas para el bot... intenta nuevamente');
-                    setTableFinished(true)
-                }
-            };
-            displayNextFileName();
-        } else {
-            setTimeout(() => {
-                setIsLoading(false);
-            }, 10000);const handleStartClick = () => {
-                setLoadModalVisible(true);
-                setIsLoading(true);
-            
-                const fileNames = projects[0]?.files?.flat().map(file => file.name);
-            
-                if (fileNames && fileNames.length > 0) {
-                    let i = 0;
-                    const displayNextFileName = () => {
-                        setLoadMessage(`Cargando archivo: ${fileNames[i]}`);
-                        i++;
-                        if (i < fileNames.length) {
-                            setTimeout(displayNextFileName, 2000);
-                        } else {
-                            setIsLoading(false);
-                        }
-                    };
-                    displayNextFileName();
-                } else {
-                    setTimeout(() => {
-                        setIsLoading(false);
-                        setLoadMessage('Fallido, no hay preguntas para el bot');
-                    }, 10000);
-                }
-            };
+
+        try {
+            const response = await fetch(`/api/table`)
+                .then(response => response.json())
+                .then(data => {
+                    return data.message;
+                })
+                .catch(error => console.error('Hubo un error:', error));
+                console.log(response);
+        } catch (error) {
+            console.error('Hubo un error:', error);
         }
     };
 
@@ -165,47 +131,46 @@ export default function Chat() {
         setInputValue(event.target.value);
     };
 
-    // const handleSendClick = async (value: string) => {
-    //     setInputValue(value);
-    //     setMessage(value);
-    //     setIsModalVisible(true);
-    //     await handleSendMessage();
-    // };
+    const handleSendClick = async (value: string) => {
+        setInputValue(value);
+        setMessage(value);
+        setIsModalVisible(true);
+        await handleSendMessage();
+    };
 
-    // const handleSendMessage = async () => {
-    //     setInputValue('')
-    //     const newMessage: Message = {
-    //         sender: "user",
-    //         content: inputValue,
-    //         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    //         avatar: '',
-    //         data: data
-    //     };
+    const handleSendMessage = async () => {
+        setInputValue('')
+        const newMessage: Message = {
+            sender: "user",
+            content: inputValue,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            avatar: '',
+            data: data
+        };
 
-    //     const updatedMessages: Message[] = [...messages, newMessage];
-    //     setMessages(updatedMessages);
+        const updatedMessages: Message[] = [...messages, newMessage];
+        setMessages(updatedMessages);
 
-    //     setMessages(updatedMessages);
-    //     setMessage("");
-    //     setTimestamps([...timestamps, newMessage]);
+        setMessages(updatedMessages);
+        setMessage("");
+        setTimestamps([...timestamps, newMessage]);
 
-    //     const botResponses = await sendMessageToBot([inputValue]);
-    //     console.log(botResponses[0]);
-    //     // console.log(botResponse)
+        const botResponses = await sendMessageToBot([inputValue]);
+        console.log(botResponses[0]);
 
 
-    //     const autoResponse: Message = {
-    //         sender: "bot",
-    //         content: '',
-    //         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    //         avatar: '',
-    //         data: data
-    //     };
+        const autoResponse: Message = {
+            sender: "bot",
+            content: '',
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            avatar: '',
+            data: data
+        };
 
-    //     setTimeout(() => {
-    //         setMessages([...updatedMessages, autoResponse]);
-    //     }, 1000);
-    // };
+        setTimeout(() => {
+            setMessages([...updatedMessages, autoResponse]);
+        }, 1000);
+    };
 
     useEffect(() => {
         if (messagesContainerRef.current) {
@@ -263,16 +228,16 @@ export default function Chat() {
         }, 4000);
     }
 
-    // useEffect(() => {
-    //     const checkUserSession = async () => {
-    //         const session = await CheckSession();
-    //         if (session.session == null) {
-    //             console.log("El usuario no está logueado");
-    //             router.push('/auth')
-    //         }
-    //     };
-    //     checkUserSession();
-    // }, [router]);
+    useEffect(() => {
+        const checkUserSession = async () => {
+            const session = await CheckSession();
+            if (session.session == null) {
+                console.log("El usuario no está logueado");
+                router.push('/auth')
+            }
+        };
+        checkUserSession();
+    }, [router]);
 
     const handleFilesOpen = () => {
         setFilesOpen(!filesOpen)
@@ -445,9 +410,9 @@ export default function Chat() {
 
             <div className="w-full max-w-7xl h-full pt-10 pb-10 flex flex-col items-center justify-start gap-5">
 
-                {/* <ChatModule hover={hover} setHover={setHover} handleSendClick={handleSendClick} inputValue={inputValue} handleMessageChange={handleMessageChange} /> */}
+                <ChatModule hover={hover} setHover={setHover} handleSendClick={handleSendClick} inputValue={inputValue} handleMessageChange={handleMessageChange} />
 
-                {/* {isModalVisible && (
+                {isModalVisible && (
                     <div className="fixed inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-start pt-[94px] gap-4">
                         <ChatModule hover={hover} setHover={setHover} handleSendClick={handleSendClick} inputValue={inputValue} handleMessageChange={handleMessageChange} />
 
@@ -476,7 +441,7 @@ export default function Chat() {
 
                         </div>
                     </div>
-                )} */}
+                )}
 
                 <div className="w-full h-auto bg-white p-5 flex flex-row justify-between items-center rounded-lg border-x-1 border-t-1 border-b-2 border-[#E0E0E0]">
 
@@ -604,7 +569,7 @@ export default function Chat() {
                     >
                         <ModalContent className="w-full h-auto">
                             <ModalBody className="w-full h-full flex flex-col items-center justify-center gap-6 p-6">
-                                {isLoading ? <CircularProgress /> : null}
+                                {isLoading ? <CircularProgress aria-label="modal" /> : null}
                                 <p>{loadMessage}</p>
                             </ModalBody>
                         </ModalContent>
