@@ -23,6 +23,7 @@
     "formidable": "^3.5.1",
     "framer-motion": "^10.16.4",
     "fs.promises": "^0.1.2",
+    "langchain": "^0.0.170",
     "next": "13.4.19",
     "next-connect": "^1.0.0",
     "openai": "^4.3.0",
