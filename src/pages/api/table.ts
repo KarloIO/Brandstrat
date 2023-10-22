@@ -95,38 +95,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const preguntas = [
             "¿Cuáles son los temas jurídicos/contables que más le interesan? ¿Alguna razón particular?",
             "¿Qué tan fácil es acceder a este tipo de información? ¿Por qué cree eso?",
-            // "En tema de costo… ¿Qué tan caro es encontrar la información que le interesa? ¿Tiene suscripciones? ¿Con qué empresas? ¿Cuánto cuestan?",
-            // "De la información que está disponible ¿Cree que está completa? ¿actualizada? ¿Qué tan relevante es? ¿Por qué piensa esto? ¿podría darme algunos ejemplos?",
-            // "¿Para qué utiliza esta información?",
-            // "¿Por cuáles medios prefiere acceder a la información? ¿Por qué?",
-            // "¿Cómo hace para acceder a este tipo de información?",
-            // "¿Dónde la busca? ENT: SI NO LO MENCIONA DE FORMA ESPONTÁNEA PREGUNTE:",
-            // "En internet: ¿A través de qué buscadores? ¿Qué tipo de páginas? ¿De qué empresas?",
-            // "Revistas especializadas: ¿Cuáles? ¿Por qué esas? ¿Cada cuánto las recibe?",
-            // "Periódicos ¿Cuáles? ¿Por qué esas?",
-            // "Subscripciones a publicaciones especializadas ¿Cuáles? ¿Por qué esas?",
-            // "¿Prefiere recibir la información de forma impresa o digital? ¿Por qué?",
-            // "Si yo le pregunto por 5 publicaciones (pueden ser impresas, digitales, como usted quiera) en las que usted pueda encontrar este tipo de información ¿cuáles son las primeras que se le vienen a la mente? ¿De quién son?",
-            // "¿Por qué pensó en estas?",
-            // "¿Conoce las publicaciones de Legis? ¿Por qué no las mencionó antes?",
-            // "Quiero que me diga las 5 primeras cosas que se le vienen a la mente cuando hablamos de Legis",
-            // "¿Por qué piensa eso?",
-            // "¿Usted contaba con la subscripción de LEGIS para la publicación: ________? ¿Qué piensa sobre esa publicación?",
-            // "¿Cuáles son las fortalezas de esa publicación y cuáles son las debilidades? ¿Por qué?",
-            // "Y ahora en general ¿Cuáles son las fortalezas de LEGIS? ¿Cuáles son las debilidades? ¿Por qué? ¿Puede darme algún ejemplo?",
-            // "¿Cuál cree usted que es la mayor competencia de LEGIS en relación con la publicación de información como la que estaba en la obra a la que usted estaba subscrito? ¿Por qué piensa esto?",
-            // "¿Cómo conoció la publicación? ¿Por cuánto tiempo lo tuvo?",
-            // "¿Qué lo atrajo o motivó a subscribirse? ¿Por qué?",
-            // "¿En cuál formato recibe la publicación (físico o digital)? ¿Qué opina sobre esos formatos? ¿cuál es su preferencia, cuál usa más? ¿por qué? ¿qué recomienda?",
-            // "¿Cómo le parecía la publicación? ¿Qué era lo bueno? ¿Qué era lo malo? ¿Qué era lo que más le gustaba? ¿Por qué?",
-            // "¿Usted llegó a recomendarle la publicación a algún amigo o colega? ¿Por qué?",
-            // "Si en este momento usted me fuera a hablar de esa publicación ¿qué me diría?",
-            // "¿Qué tipo de beneficios obtendría si me subscribiera a esa publicación?",
-            // "¿A qué tendría acceso?",
-            // "¿Cada cuánto recibiría esta información?",
-            // "¿Por cuáles medios podría consultar la información?",
-            // "¿Tendría alguna ventaja por tener mi suscripción con LEGIS? ¿Cuál?",
-            // "¿Cuánto tendría que pagar"
         ];
         
         const todasLasRespuestas: any[] = [];
@@ -145,7 +113,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const respuestaUsuario = respuesta.text;
                 usuarios[usuario].respuestaPorUsuario = respuestaUsuario;
 
-                respuestasPorPregunta[usuarioIndices[usuario]] = { name: usuario, respuesta: respuestaUsuario };
+                if (Array.isArray(respuestasPorPregunta)) {
+                    respuestasPorPregunta[usuarioIndices[usuario]] = { name: usuario, respuesta: respuestaUsuario };
+                } else {
+                    console.error('Error: respuestasPorPregunta no es un array');
+                }
 
                 return { name: usuario, respuesta: respuestaUsuario };
             });
