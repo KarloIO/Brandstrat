@@ -86,6 +86,16 @@ const ChatModule: React.FC<ChatModuleProps> = ({ hover, setHover, handleSendClic
     );
 };
 
+type Respuesta = {
+    name: string;
+    respuesta: string;
+};
+
+type PreguntaData = {
+    title: string;
+    respuestas: Respuesta[];
+};
+
 export default function Chat() {
     const router = useRouter();
     const pathname = usePathname();
@@ -109,6 +119,8 @@ export default function Chat() {
     const [isLoadModalVisible, setLoadModalVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [loadMessage, setLoadMessage] = useState('Cargando archivos...');
+    const [entrevistaData, setEntrevistaData] = useState<PreguntaData[]>([]);
+    const [preguntaSeleccionada, setPreguntaSeleccionada] = useState<PreguntaData | null>(entrevistaData[0] || null);
 
     const handleStartClick = async () => {
         setLoadModalVisible(true);
@@ -118,10 +130,13 @@ export default function Chat() {
             const response = await fetch(`/api/table`)
                 .then(response => response.json())
                 .then(data => {
-                    return data.message;
+                    setEntrevistaData(data);
+                    setTableFinished(true)
+                    setLoadModalVisible(false)
+                    return data;
                 })
                 .catch(error => console.error('Hubo un error:', error));
-                console.log(response);
+            console.log(response);
         } catch (error) {
             console.error('Hubo un error:', error);
         }
@@ -443,7 +458,7 @@ export default function Chat() {
                     </div>
                 )}
 
-                <div className="w-full h-auto bg-white p-5 flex flex-row justify-between items-center rounded-lg border-x-1 border-t-1 border-b-2 border-[#E0E0E0]">
+                <div className="w-full h-auto bg-white px-5 py-3 flex flex-row justify-between items-center rounded-lg border-x-1 border-t-1 border-b-2 border-[#E0E0E0]">
 
                     <div className="w-auto h-auto flex flex-col items-start justify-start cursor-default">
 
@@ -602,37 +617,40 @@ export default function Chat() {
 
                             <div className="w-full h-[calc(100%-40px)] box-border border-1 border-[#E0E0E0] rounded-md flex flex-row items-start justify-start">
 
-                                <div className="w-1/3 h-full rounded-s-lg flex flex-col items-start justify-start gap-2 p-2">
+                                <div className="questions w-1/3 h-full rounded-s-lg flex flex-col items-start justify-start gap-2 p-2 max-h-[488px] overflow-auto" dir="rtl">
 
-                                    {/* <div className="w-full h-auto min-h-[52px] flex flex-col items-start justify-center p-4 gap-2 rounded-md hover:bg-[#FDEBDC] cursor-pointer hover:font-semibold duration-200">
-
-                                        <span>¿Que informacion necesita su trabajo/empresa?</span>
-
-                                    </div> */}
+                                    {entrevistaData.map((preguntaData, index) => (
+                                        <div
+                                            key={index}
+                                            className={`w-full h-auto min-h-[52px] flex flex-col items-start justify-center p-4 gap-2 rounded-md cursor-pointer hover:font-semibold duration-200 ${preguntaData === preguntaSeleccionada ? 'bg-[#F9CAA2]' : 'hover:bg-[#FDEBDC]'} ${preguntaData === preguntaSeleccionada ? ' font-semibold' : ' font-normal'}`}
+                                            onClick={() => setPreguntaSeleccionada(preguntaData)}
+                                            dir="ltr"
+                                        >
+                                            <span>{preguntaData.title}</span>
+                                        </div>
+                                    ))}
 
                                 </div>
 
-                                <div className="w-2/3 h-full bg-[#EFF0F3] rounded-e-lg flex flex-row gap-2 p-2 items-start justify-start overflow-x-scroll">
+                                <div className="w-2/3 h-full min-h-[488px] bg-[#EFF0F3] rounded-e-lg flex flex-row gap-2 p-2 items-start justify-start overflow-x-auto">
 
-                                    <div className="min-w-[256px] max-w-[312px] h-full flex flex-col gap-2">
-
-                                        {/* <div className="w-full min-h-[36px] flex items-center justify-center rounded-md px-3 py-2 bg-white cursor-default">
-
-                                            <span className=" text-base font-medium text-[#131315]">Mateo Aponte</span>
-
-                                        </div> */}
-
-                                        <div className="w-full min-h-[36px] flex items-center justify-center rounded-md px-3 py-2 bg-white cursor-default">
-
-                                            {/* <div className=" overflow-y-scroll w-full h-full max-h-[412px]">
-
-                                                <span className=" text-base font-normal text-[#131315]">De la corte constitucional mas que todo porque estoy mas enfocado hacia el derecho privado, entonces se que las publicaciones tienen todas las ramas del derecho pero me interesa mas la corte institucional De la corte constitucional mas que todo porque estoy mas enfocado hacia el derecho privado, entonces se que las publicaciones tienen todas las ramas del derecho pero me interesa mas la corte institucionalDe la corte constitucional mas que todo porque estoy mas enfocado hacia el derecho privado, entonces se que las publicaciones tienen todas las ramas del derecho pero me interesa mas la corte institucionalDe la corte constitucional mas que todo porque estoy mas enfocado hacia el derecho privado, entonces se que las publicaciones tienen todas las ramas del derecho pero me interesa mas la corte institucional</span>
-
-                                            </div> */}
-
+                                    {preguntaSeleccionada && preguntaSeleccionada.respuestas.map((respuesta, index) => (
+                                        <div key={index} className="w-full min-h-[36px] flex flex-col items-start justify-start rounded-md bg-[#EFF0F3] cursor-default h-full gap-2 p-2">
+                                            <div className="w-full min-w-[256px] h-full max-h-[36px] flex items-center justify-center rounded-md px-3 py-2 bg-white cursor-default">
+                                                <span className=" text-base font-medium text-[#131315]">{respuesta.name}</span>
+                                            </div>
+                                            <div className=" overflow-y-auto w-full h-full max-h-[420px] p-4 bg-white rounded-lg flex items-center">
+                                                <div className="h-full mt-3 px-2">
+                                                    {respuesta.respuesta && respuesta.respuesta.split('.').filter(sentence => sentence.trim() !== '').map((sentence, index) => (
+                                                        <React.Fragment key={index}>
+                                                            <p className=" text-base font-normal text-[#131315]">{sentence + '.'}</p>
+                                                            {index !== respuesta.respuesta.split('.').length - 2 && <br />}
+                                                        </React.Fragment>
+                                                    ))}
+                                                </div>
+                                            </div>
                                         </div>
-
-                                    </div>
+                                    ))}
 
                                 </div>
 
