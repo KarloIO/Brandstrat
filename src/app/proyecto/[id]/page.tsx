@@ -2,7 +2,7 @@
 import Image from "next/image";
 import React, { useState, useEffect, useRef } from "react";
 import { Avatar, Divider, Tooltip, Select, SelectItem, Progress, Modal, ModalContent, ModalBody, Button, CircularProgress } from "@nextui-org/react";
-import { sendMessageToBot } from "@/pages/api/bot";
+// import { sendMessageToBot } from "@/pages/api/bot";
 import { useRouter, usePathname } from "next/navigation";
 import CheckSession from '@/lib/checkSession'
 import supabaseClient from '@/lib/supabase'
@@ -170,8 +170,8 @@ export default function Chat() {
         setMessage("");
         setTimestamps([...timestamps, newMessage]);
 
-        const botResponses = await sendMessageToBot([inputValue]);
-        console.log(botResponses[0]);
+        // const botResponses = await sendMessageToBot([inputValue]);
+        // console.log(botResponses[0]);
 
 
         const autoResponse: Message = {
