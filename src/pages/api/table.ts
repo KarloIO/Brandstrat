@@ -20,7 +20,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             limit: 100,
             offset: 0
         })
-        const nombresArchivos = data?.map(archivo => archivo.name);
+        if (Array.isArray(data)) {
+            const nombresArchivos = data.map(archivo => archivo.name);
         console.log(nombresArchivos);
     
         if (error) {
@@ -129,7 +130,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.log(todasLasRespuestas);
 
         res.status(200).json(todasLasRespuestas);
-    } catch (error) {
+    }} catch (error) {
         console.error("Error en el bot:", error);
         res.status(500).json({ error: 'Hubo un error en el servidor' });
     }
