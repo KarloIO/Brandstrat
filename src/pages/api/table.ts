@@ -1,4 +1,4 @@
-'use server';
+// 'use server';
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import supabaseClient from '@/lib/supabase'
 import { OpenAI } from "langchain/llms/openai";
