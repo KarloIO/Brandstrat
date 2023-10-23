@@ -12,10 +12,12 @@ import pdfParse from 'pdf-parse';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 
+    const PROJECT = req.body.projectName
+
     try {
         const { data, error } = await supabaseClient
             .storage
-            .from('Probando')
+            .from(PROJECT)
             .list('', {
                 limit: 100,
                 offset: 0
@@ -33,7 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const descargas = nombresArchivos.map(async (nombreArchivo) => {
                     const { data: archivo, error: errorDescarga } = await supabaseClient
                         .storage
-                        .from('Probando')
+                        .from(PROJECT)
                         .download(nombreArchivo);
 
                     if (errorDescarga) {
@@ -103,42 +105,84 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         }
                     }
 
-                    const preguntas = [
-                        "¿Cuáles son los temas jurídicos/contables que más le interesan? ¿Alguna razón particular?",
-                        // "¿Qué tan fácil es acceder a este tipo de información? ¿Por qué cree eso?",
-                        // "En tema de costo… ¿Qué tan caro es encontrar la información que le interesa? ¿Tiene suscripciones? ¿Con qué empresas? ¿Cuánto cuestan?",
-                        // "De la información que está disponible ¿Cree que está completa? ¿actualizada? ¿Qué tan relevante es? ¿Por qué piensa esto? ¿podría darme algunos ejemplos?",
-                        // "¿Para qué utiliza esta información?",
-                        // "¿Por cuáles medios prefiere acceder a la información? ¿Por qué?",
-                        // "¿Cómo hace para acceder a este tipo de información?",
-                        // "¿Dónde la busca?",
-                        // "En internet: ¿A través de qué buscadores? ¿Qué tipo de páginas? ¿De qué empresas?",
-                        // "Revistas especializadas: ¿Cuáles? ¿Por qué esas? ¿Cada cuánto las recibe?",
-                        // "Periódicos ¿Cuáles? ¿Por qué esas?",
-                        // "Subscripciones a publicaciones especializadas ¿Cuáles? ¿Por qué esas?",
-                        // "¿Prefiere recibir la información de forma impresa o digital? ¿Por qué?",
-                        // "Si yo le pregunto por 5 publicaciones (pueden ser impresas, digitales, como usted quiera) en las que usted pueda encontrar este tipo de información ¿cuáles son las primeras que se le vienen a la mente? ¿De quién son?",
-                        // "¿Por qué pensó en estas?",
-                        // "¿Conoce las publicaciones de Legis? ¿Por qué no las mencionó antes?",
-                        // "Quiero que me diga las 5 primeras cosas que se le vienen a la mente cuando hablamos de Legis",
-                        // "¿Por qué piensa eso?",
-                        // "¿Usted contaba con la subscripción de LEGIS para la publicación: ________? ¿Qué piensa sobre esa publicación?",
-                        // "¿Cuáles son las fortalezas de esa publicación y cuáles son las debilidades? ¿Por qué?",
-                        // "Y ahora en general ¿Cuáles son las fortalezas de LEGIS? ¿Cuáles son las debilidades? ¿Por qué? ¿Puede darme algún ejemplo?",
-                        // "¿Cuál cree usted que es la mayor competencia de LEGIS en relación con la publicación de información como la que estaba en la obra a la que usted estaba subscrito? ¿Por qué piensa esto?",
-                        // "¿Cómo conoció la publicación? ¿Por cuánto tiempo lo tuvo?",
-                        // "¿Qué lo atrajo o motivó a subscribirse? ¿Por qué?",
-                        // "¿En cuál formato recibe la publicación (físico o digital)? ¿Qué opina sobre esos formatos? ¿cuál es su preferencia, cuál usa más? ¿por qué? ¿qué recomienda?",
-                        // "¿Cómo le parecía la publicación? ¿Qué era lo bueno? ¿Qué era lo malo? ¿Qué era lo que más le gustaba? ¿Por qué?",
-                        // "¿Usted llegó a recomendarle la publicación a algún amigo o colega? ¿Por qué?",
-                        // "Si en este momento usted me fuera a hablar de esa publicación ¿qué me diría?",
-                        // "¿Qué tipo de beneficios obtendría si me subscribiera a esa publicación?",
-                        // "¿A qué tendría acceso?",
-                        // "¿Cada cuánto recibiría esta información?",
-                        // "¿Por cuáles medios podría consultar la información?",
-                        // "¿Tendría alguna ventaja por tener mi suscripción con LEGIS? ¿Cuál?",
-                        // "¿Cuánto tendría que pagar?"
-                    ];
+                    const { data, error } = await supabaseClient
+                    .storage
+                    .from(PROJECT)
+                    .list('questions', {
+                        limit: 100,
+                        offset: 0
+                    })
+                    if (error) {
+                        console.error('Error al listar los archivos:', error);
+                        return;
+                    }
+                    const archivos = data.filter(archivo => archivo.name !== '.emptyFolderPlaceholder');
+                    const descargas = archivos.map(async (archivo) => {
+                        const { data: archivoDescargado, error: errorDescarga } = await supabaseClient
+                        .storage
+                        .from(PROJECT)
+                        .download(`questions/${archivo.name}`);
+                        if (errorDescarga) {
+                            console.error(`Error al descargar el archivo ${archivo.name}:`, errorDescarga);
+                            return;
+                        }
+                        // Convertir Blob a texto legible
+                        const arrayBuffer = await archivoDescargado.arrayBuffer();
+                        const buffer = Buffer.from(arrayBuffer);
+                        const data = await pdfParse(buffer);
+                        return data.text;
+                    });
+                    const questions: (string | undefined)[] = await Promise.all(descargas);
+                    let preguntas: any[] = []; // Declarar preguntas aquí
+
+                    if (questions[0] !== undefined) {
+                        const texto = questions[0];
+                        const textoProcesado = texto.replace(/\d+\./g, '').replace(/(\w)([A-Z])/g, '$1 $2');
+                        const preguntasArray = textoProcesado.split('\n').map(pregunta => pregunta.trim()).filter(pregunta => pregunta !== '');
+                        preguntas = preguntasArray.map(pregunta => ({ pregunta: pregunta })); // Asignar valor a preguntas aquí
+                        console.log(preguntas);
+                    } else {
+                        console.error('No se encontraron preguntas en el archivo descargado');
+                    }
+
+
+
+                    // const preguntas = [
+                    //     "¿Cuáles son los temas jurídicos/contables que más le interesan? ¿Alguna razón particular?",
+                    //     "¿Qué tan fácil es acceder a este tipo de información? ¿Por qué cree eso?",
+                    //     "En tema de costo… ¿Qué tan caro es encontrar la información que le interesa? ¿Tiene suscripciones? ¿Con qué empresas? ¿Cuánto cuestan?",
+                    //     "De la información que está disponible ¿Cree que está completa? ¿actualizada? ¿Qué tan relevante es? ¿Por qué piensa esto? ¿podría darme algunos ejemplos?",
+                    //     "¿Para qué utiliza esta información?",
+                    //     "¿Por cuáles medios prefiere acceder a la información? ¿Por qué?",
+                    //     "¿Cómo hace para acceder a este tipo de información?",
+                    //     "¿Dónde la busca?",
+                    //     "En internet: ¿A través de qué buscadores? ¿Qué tipo de páginas? ¿De qué empresas?",
+                    //     "Revistas especializadas: ¿Cuáles? ¿Por qué esas? ¿Cada cuánto las recibe?",
+                    //     "Periódicos ¿Cuáles? ¿Por qué esas?",
+                    //     "Subscripciones a publicaciones especializadas ¿Cuáles? ¿Por qué esas?",
+                    //     "¿Prefiere recibir la información de forma impresa o digital? ¿Por qué?",
+                    //     "Si yo le pregunto por 5 publicaciones (pueden ser impresas, digitales, como usted quiera) en las que usted pueda encontrar este tipo de información ¿cuáles son las primeras que se le vienen a la mente? ¿De quién son?",
+                    //     "¿Por qué pensó en estas?",
+                    //     "¿Conoce las publicaciones de Legis? ¿Por qué no las mencionó antes?",
+                    //     "Quiero que me diga las 5 primeras cosas que se le vienen a la mente cuando hablamos de Legis",
+                    //     "¿Por qué piensa eso?",
+                    //     "¿Usted contaba con la subscripción de LEGIS para la publicación: ________? ¿Qué piensa sobre esa publicación?",
+                    //     "¿Cuáles son las fortalezas de esa publicación y cuáles son las debilidades? ¿Por qué?",
+                    //     "Y ahora en general ¿Cuáles son las fortalezas de LEGIS? ¿Cuáles son las debilidades? ¿Por qué? ¿Puede darme algún ejemplo?",
+                    //     "¿Cuál cree usted que es la mayor competencia de LEGIS en relación con la publicación de información como la que estaba en la obra a la que usted estaba subscrito? ¿Por qué piensa esto?",
+                    //     "¿Cómo conoció la publicación? ¿Por cuánto tiempo lo tuvo?",
+                    //     "¿Qué lo atrajo o motivó a subscribirse? ¿Por qué?",
+                    //     "¿En cuál formato recibe la publicación (físico o digital)? ¿Qué opina sobre esos formatos? ¿cuál es su preferencia, cuál usa más? ¿por qué? ¿qué recomienda?",
+                    //     "¿Cómo le parecía la publicación? ¿Qué era lo bueno? ¿Qué era lo malo? ¿Qué era lo que más le gustaba? ¿Por qué?",
+                    //     "¿Usted llegó a recomendarle la publicación a algún amigo o colega? ¿Por qué?",
+                    //     "Si en este momento usted me fuera a hablar de esa publicación ¿qué me diría?",
+                    //     "¿Qué tipo de beneficios obtendría si me subscribiera a esa publicación?",
+                    //     "¿A qué tendría acceso?",
+                    //     "¿Cada cuánto recibiría esta información?",
+                    //     "¿Por cuáles medios podría consultar la información?",
+                    //     "¿Tendría alguna ventaja por tener mi suscripción con LEGIS? ¿Cuál?",
+                    //     "¿Cuánto tendría que pagar?"
+                    // ];
 
                     const todasLasRespuestas: any[] = [];
                     const usuarioIndices = Object.keys(usuarios).reduce((acc: { [key: string]: number }, usuario: string, index: number) => {
@@ -152,7 +196,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         const promesas = Object.keys(usuarios).map(async (usuario: any) => {
                             const preguntaPersonalizada = `${usuario}, ${pregunta}, si no lo sabe solo diga: "no tengo una respuesta para eso"}`;
                     
-                            const respuesta: any = await chain.call({ query: preguntaPersonalizada })
+                            const respuesta: any = await chain.call({ query: `${preguntaPersonalizada}, responde siempre en español` })
                             console.log('Respuesta obtenida:', respuesta);
                             
                             if (typeof respuesta !== 'object' || respuesta === null) {

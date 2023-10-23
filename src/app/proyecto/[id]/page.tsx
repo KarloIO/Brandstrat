@@ -7,6 +7,10 @@ import { useRouter, usePathname } from "next/navigation";
 import CheckSession from '@/lib/checkSession'
 import supabaseClient from '@/lib/supabase'
 import '@/styles/chat.css'
+import pdfMake from "pdfmake/build/pdfmake";
+import pdfFonts from "pdfmake/build/vfs_fonts";
+
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 import arrowR from '@/public/icons/arrow-right.svg'
 import link from '@/public/icons/link.svg';
@@ -68,6 +72,7 @@ interface FileWithId extends File {
     id: number;
     url: string;
     name: string;
+    title: string;
 }
 
 const ChatModule: React.FC<ChatModuleProps> = ({ hover, setHover, handleSendClick, inputValue, handleMessageChange }) => {
@@ -121,19 +126,30 @@ export default function Chat() {
     const [loadMessage, setLoadMessage] = useState('Cargando archivos...');
     const [entrevistaData, setEntrevistaData] = useState<PreguntaData[]>([]);
     const [preguntaSeleccionada, setPreguntaSeleccionada] = useState<PreguntaData | null>(entrevistaData[0] || null);
+    const [questionsOpen, setQuestionsOpen] = useState(false);
+    const [questions, setQuestions] = useState<FileWithId[]>([]);
+    const [loadingQuestionIndex, setLoadingQuestionIndex] = useState<number | null>(null);
+    const [completedQuestions, setCompletedQuestions] = useState<number[]>([]);
 
     const handleStartClick = async () => {
         setLoadModalVisible(true);
         setIsLoading(true);
 
         try {
-            const response = await fetch(`/api/table`)
+            const response = await fetch(`/api/table`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ projectName: projects[0].name }),
+            })
                 .then(response => response.json())
                 .then(data => {
                     console.log(data);
                     setEntrevistaData(data);
                     setTableFinished(true)
                     setLoadModalVisible(false)
+                    exportToPDF(data);
                     return data;
                 })
                 .catch(error => console.log(error));
@@ -212,11 +228,14 @@ export default function Chat() {
             .from('proyectos')
             .select('*')
             .eq('name', projectId);
-
+    
         if (error) {
             console.error('Error al obtener proyectos:', error)
         } else {
             setProjects(data)
+            const questions = data[0]?.questions || [];
+            console.log(questions)
+            setQuestions(questions.flat());
         }
     }
 
@@ -231,6 +250,30 @@ export default function Chat() {
                 .from('proyectos')
                 .update({
                     files: newFiles
+                })
+                .eq('name', projects[0].name)
+                .select()
+            console.log(data)
+            if (error) {
+                console.error('Error al actualizar los archivos del proyecto:', error);
+            } else {
+                console.log('Archivos del proyecto actualizados con éxito:', data);
+                router.refresh();
+            }
+        }, 4000);
+    }
+
+    const updateProjectQuestions = async (files: FileWithId[], url: string) => {
+        const newQuestions = files.map(file => [({ name: file.name, size: parseFloat((file.size / (1024 * 1024)).toFixed(2)), url: url })]);
+
+        console.log(newQuestions)
+        console.log(projects[0].name)
+
+        setTimeout(async () => {
+            const { data, error } = await supabaseClient
+                .from('proyectos')
+                .update({
+                    questions: newQuestions
                 })
                 .eq('name', projects[0].name)
                 .select()
@@ -380,6 +423,161 @@ export default function Chat() {
         });
     };
 
+    const exportToPDF = (data: PreguntaData[]) => {
+        // Crear un array para almacenar las filas de la tabla
+        const tableBody: any[] = [];
+
+        // Añadir los nombres de los entrevistados a la primera fila
+        const headerRow = [''];
+        data[0].respuestas.forEach((respuesta) => {
+            headerRow.push(respuesta.name);
+        });
+        tableBody.push(headerRow);
+
+        // Para cada pregunta en los datos
+        data.forEach((preguntaData) => {
+            // Añadir la pregunta en la primera columna
+            const row = [preguntaData.title];
+
+            // Para cada respuesta en las respuestas de la pregunta
+            preguntaData.respuestas.forEach((respuesta) => {
+                // Añadir la respuesta a la celda correspondiente
+                row.push(respuesta.respuesta);
+            });
+
+            tableBody.push(row);
+        });
+
+        // Crear la definición del documento
+        const docDefinition = {
+            content: [
+                { text: 'Reporte de Preguntas', style: 'header' },
+                {
+                    table: {
+                        headerRows: 1,
+                        body: tableBody
+                    }
+                }
+            ],
+            styles: {
+                header: {
+                    fontSize: 18,
+                    bold: true,
+                    margin: [0, 0, 0, 10]
+                }
+            }
+        };
+
+        // Crear el PDF
+        pdfMake.createPdf(docDefinition).download(`${pathname}.pdf`);
+    };
+
+    const handleExportToExcel = () => {
+        exportToPDF(entrevistaData);
+    };
+
+    const handleQuestionsOpen = () => {
+        setQuestionsOpen(!questionsOpen);
+    }
+
+    const handleQuestionUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files) {
+            const newQuestions = Array.from(event.target.files) as FileWithId[];
+            newQuestions.forEach(question => question.id = Date.now());
+
+            const newUniqueQuestions = newQuestions.filter(newQuestion =>
+                !questions.some(existingQuestion => existingQuestion.name === newQuestion.name)
+            );
+
+            setQuestions(oldQuestions => [...oldQuestions, ...newUniqueQuestions]);
+
+            event.target.value = '';
+        }
+    };
+
+    const handleQuestionDelete = async (questionId: any) => {
+        const questionToDelete = questions.find(question => question.id === Number(questionId));
+        if (questionToDelete) {
+            const { data, error } = await supabaseClient
+                .storage
+                .from(projects[0].name)
+                .remove([`questions/${questionToDelete.name}`]);
+            if (data) {
+                const updatedQuestions = questions.filter(question => question.id !== questionToDelete.id);
+                setQuestions(updatedQuestions);
+            } else {
+                console.log('algo fallo')
+            }
+        }
+    };
+
+    const handleQuestionSave = async () => {
+        setIsSaving(true);
+        const questionsToSave = questions.filter(question => !completedQuestions.includes(question.id));
+        questionsToSave.forEach(async (question, index) => {
+            setTimeout(async () => {
+                setLoadingQuestionIndex(question.id);
+                setProgress(0);
+                console.log(`Guardando pregunta: ${question.name}`);
+                const { data, error } = await supabaseClient.storage.listBuckets()
+                if (error) {
+                    console.error('Error al listar los buckets:', error)
+                } else {
+                    const bucketExists = data.some(bucket => bucket.id === projects[0]?.name)
+    
+                    if (!bucketExists) {
+                        const { data, error } = await supabaseClient.storage.createBucket(projects[0]?.name, {
+                            public: true,
+                        })
+    
+                        if (error) {
+                            console.error('Error al crear el bucket:', error)
+                        } else {
+                            console.log('Bucket creado con éxito:', data)
+                        }
+                    }
+                }
+    
+                const filePath = `questions/${question.name}`;
+                const { data: uploadData, error: uploadError } = await supabaseClient
+                    .storage
+                    .from(projects[0]?.name)
+                    .upload(filePath, question);
+                if (uploadError) {
+                    console.error('Hubo un error subiendo la pregunta:', uploadError);
+                } else {
+                    const { data, error } = await supabaseClient
+                        .storage
+                        .from(projects[0]?.name)
+                        .createSignedUrl(uploadData.path, 7889400)
+                    console.log(data)
+                    const questionUrl = data?.signedUrl || '';
+                    console.log('Pregunta subida con éxito:', uploadData);
+    
+                    if (question.id === questionsToSave[questionsToSave.length - 1].id) {
+                        setIsSaving(false);
+                        await updateProjectQuestions(questionsToSave, questionUrl);
+                    }
+                }
+    
+                const intervalId = setInterval(() => {
+                    setProgress(oldProgress => {
+                        if (oldProgress >= 100) {
+                            clearInterval(intervalId);
+                            setCompletedQuestions(oldArray => [...oldArray, question.id]);
+                            if (question.id === questionsToSave[questionsToSave.length - 1].id) {
+                                setIsSaving(false);
+                            }
+                            setLoadingQuestionIndex(null);
+                            return 100;
+                        }
+                        return oldProgress + 10;
+                    });
+                }, 600);
+            }, index * 7000);
+        });
+    };
+
     return (
 
         <div className="w-screen h-auto flex flex-col items-center justify-start px-32">
@@ -483,7 +681,7 @@ export default function Chat() {
 
                         <div className="flex flex-col gap-0 items-start justify-start">
 
-                            <span className="font-bold text-base text-[#F29545] cursor-pointer">Preguntas</span>
+                            <span className="font-bold text-base text-[#F29545] cursor-pointer" onClick={handleQuestionsOpen}>Preguntas</span>
 
                             <span className="font-normal text-base text-[#8A90A7] cursor-default">Inspeccionar Carpeta</span>
 
@@ -591,6 +789,65 @@ export default function Chat() {
                         </ModalContent>
                     </Modal>
 
+                    <Modal
+                        backdrop="opaque"
+                        isOpen={questionsOpen}
+                        onOpenChange={handleQuestionsOpen}
+                        classNames={{
+                            backdrop: "bg-gradient-to-t from-zinc-900 to-zinc-900/10 backdrop-opacity-20"
+                        }}
+                        className="w-full h-auto max-w-[464px] max-h-[600px] rounded-lg"
+                        isDismissable={false}
+                    >
+                        <ModalContent className="w-full h-auto">
+                            {(onClose) => (
+                                <div className="w-full h-full flex flex-col items-center justify-start gap-6 p-6">
+                                    <ModalBody className="w-full h-full flex flex-col items-center justify-start gap-6 p-0">
+                                        <div className="w-full h-full flex flex-col gap-2 cursor-default">
+                                            <span className=" font-bold text-xl text-[#31313A]">Preguntas</span>
+
+                                            <div className="questions pr-1 flex flex-col items-start justify-start gap-2 max-h-[192px] overflow-auto">
+
+                                            {questions.map((question) => (
+    <div key={question.name} className={`border-2 rounded-md w-full h-auto  flex flex-row px-2 py-1.5 items-center border-[#F29545]`}>
+        <div className="w-full flex flex-row items-center justify-start gap-2">
+            <Image src={fileIcon} alt="file" width={24} height={24} className="file active" />
+            <div className="flex flex-col gap-0 p-0 w-full">
+                <span className="text-sm font-semibold" style={{ color: '#F29545' }}>{question.name}</span>
+                <span className="text-sm font-normal" style={{ color: '#F29545' }}>{(question.size)} MB</span>
+            </div>
+            <Image src={deleteIcon} alt="delete file" width={24} height={24} className="delete active cursor-pointer h-6" onClick={() => handleQuestionDelete(question.id)} />
+        </div>
+    </div>
+))}
+
+                                            </div>
+                                        </div>
+
+                                        <div className="w-full h-full flex flex-col gap-2 cursor-default">
+                                            <span className="w-full font-bold text-xl text-[#31313A]"></span>
+
+                                            <div className="pendings pr-1 flex flex-col items-start justify-start gap-2 max-h-[192px] overflow-auto">
+
+                                                {!isSaving && (
+                                                    <div className="border-[#8A90A7] border-dashed border-2 rounded-md w-full h-auto max-h-[54px] flex flex-row items-center justify-center">
+                                                        <div className="w-full h-auto max-h-[54px] flex flex-row items-center justify-center">
+                                                            <label htmlFor="dropzone-question" className="flex flex-col items-center justify-center w-full h-[48px] border-[#8A90A7] rounded-md cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                                                                <p className="text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Haz click para cargar un <strong>PDF</strong></span></p>
+                                                                <input id="dropzone-question" type="file" className="hidden" onChange={handleQuestionUpload} accept="application/pdf" />
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <Button isLoading={isSaving} onClick={handleQuestionSave} className="w-full h-auto flex p-2 text-[#DADCE3] font-semibold text-sm bg-[#31313A] rounded">Guardar Preguntas</Button>
+                                    </ModalBody>
+                                </div>
+                            )}
+                        </ModalContent>
+                    </Modal>
+
                 </div>
 
                 {isTableFinished ? (
@@ -608,7 +865,7 @@ export default function Chat() {
 
                             <div className="w-full min-h-[32px] max-h-[32px] flex flex-row p-2 items-center justify-between cursor-default">
 
-                                <span className=" text-base font-bold text-[#F29545]">Tabla Completa</span>
+                                <span className=" text-base font-bold text-[#F29545]" onClick={handleExportToExcel}>Tabla Completa</span>
 
                                 <Select aria-label="Selector" className="max-w-xs max-h-8 overflow-hidden flex flex-col items-center justify-center">
                                     <SelectItem key={1} >Empty</SelectItem>
@@ -633,7 +890,7 @@ export default function Chat() {
 
                                 </div>
 
-                                <div className="w-2/3 h-full min-h-[488px] bg-[#EFF0F3] rounded-e-lg flex flex-row gap-2 p-2 items-start justify-start overflow-x-auto">
+                                <div className="w-2/3 h-full min-h-[488px] bg-[#EFF0F3] rounded-e-lg flex flex-row p-2 items-start justify-start overflow-x-auto">
 
                                     {preguntaSeleccionada && preguntaSeleccionada?.respuestas?.map((respuesta, index) => (
                                         <div key={index} className="w-full min-h-[36px] flex flex-col items-start justify-start rounded-md bg-[#EFF0F3] cursor-default h-full gap-2 p-2">
