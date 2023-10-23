@@ -165,7 +165,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             await new Promise(resolve => setTimeout(resolve, 1500));
                             const respuesta: any = await chain.call({ query: `${preguntaPersonalizada}, asegurate de entender bien lo que dice cada entrevistado para no dar una respuesta erronea, siempre responde en español` })
 
-                            const respuestaUsuario = respuesta.text;
+                            let respuestaUsuario;
+                            
+                            if (typeof respuesta === 'string') {
+                                respuestaUsuario = respuesta;
+                            } else if (typeof respuesta === 'object' && respuesta !== null && 'text' in respuesta) {
+                                respuestaUsuario = respuesta.text;
+                            } else {
+                                console.error('La respuesta no es una cadena ni un objeto válido:', respuesta);
+                                throw new Error('Respuesta inválida');
+                            }
+                            
                             usuarios[usuario].respuestaPorUsuario = respuestaUsuario;
                             
                             if (Array.isArray(respuestasPorPregunta)) {
