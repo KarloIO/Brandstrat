@@ -88,12 +88,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     return nombres;
                 }
 
-                const entrevistados = await obtenerNombresEntrevistados();
-                for (const entrevistado of entrevistados) {
-                    if (typeof entrevistado === 'string') {
-                        usuarios[entrevistado] = { respuestaPorUsuario: "" };
-                    }
-                }
+
+
+try {
+    const entrevistados = await obtenerNombresEntrevistados();
+    for (const entrevistado of entrevistados) {
+        if (typeof entrevistado === 'string') {
+            usuarios[entrevistado] = { respuestaPorUsuario: "" };
+        }
+    }
 
                 const preguntas = [
                     "¿Cuáles son los temas jurídicos/contables que más le interesan? ¿Alguna razón particular?",
@@ -165,6 +168,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 console.log(todasLasRespuestas);
 
                 res.status(200).json(todasLasRespuestas);
+            } catch (error) {
+                console.error("Error después de obtener los nombres de los entrevistados:", error);
+            }
             } else {
                 console.error('nombresArchivos no es un array:', nombresArchivos);
             }
