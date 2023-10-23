@@ -1,0 +1,716 @@
+[
+    {
+        "title": "¿Cuáles son los temas jurídicos/contables que más le interesan? ¿Alguna razón particular?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "Los temas jurídicos/contables que más le interesan a Don Aristarco son tributaria, laboral y comercial. No se menciona una razón particular para su interés en estos temas."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "Rafael menciona que los temas jurídicos que más le interesan son las sentencias y el derecho administrativo, ya que litiga en lo contencioso administrativo. No se menciona ninguna razón particular para su interés en estos temas."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "No tengo una respuesta para eso."
+            }
+        ]
+    },
+    {
+        "title": "¿Qué tan fácil es acceder a este tipo de información? ¿Por qué cree eso?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "ARISTARCO: Para mí, es relativamente fácil acceder a este tipo de información. Tengo una buena amistad con Alejandra, la niña de Legis en el centro en Villavicencio, y puedo solicitarle cualquier material que necesite. Además, compro revistas y también puedo encontrar información en la página de la DIAN. Sin embargo, entiendo que para otros colegas puede ser más difícil si no están familiarizados con las tecnologías de la información. En general, creo que todo hoy en día es digital y debemos enfrentarnos a esa realidad."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "Maria no tiene una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "Rafael: Para mí, acceder a este tipo de información es fácil porque tengo conocimiento en tecnologías de la información y sé cómo buscarla. Sin embargo, sé que muchos de mis colegas tienen dificultades con esto y se niegan a utilizar las tecnologías. En general, hoy en día todo es digital y debemos enfrentarnos a esa realidad."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "Viviana menciona que acceder a la información no es fácil y que a veces no le permite acceder rápidamente a lo que busca. Sin embargo, también menciona que las entidades tienen buscadores medianamente buenos y que los buscadores de Internet generan muchos enlaces útiles. Por lo tanto, parece que Viviana considera que acceder a este tipo de información puede ser relativamente fácil, aunque no perfecto."
+            }
+        ]
+    },
+    {
+        "title": "En tema de costo… ¿Qué tan caro es encontrar la información que le interesa? ¿Tiene suscripciones? ¿Con qué empresas? ¿Cuánto cuestan?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "ARISTARCO: Bueno, en cuanto al costo de encontrar la información que me interesa, para mí no es caro porque considero que la utilidad que obtengo de las publicaciones de Legis compensa el precio. No considero que sean costosas para mí, ya que recupero la inversión a través de las declaraciones de renta y otros servicios que puedo ofrecer. En cuanto a las suscripciones, siempre he optado por los pagos anuales y no tengo conocimiento de otras alternativas de pago mensual. No tengo una respuesta específica sobre las empresas con las que tengo suscripciones y sus costos."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "Maria, en tema de costo, la respuesta varía dependiendo de las personas entrevistadas. Aristarco menciona que para él es relativamente fácil acceder a la información que necesita a través de su amistad con Alejandra de Legis. Rafael menciona que la información de las cortes es gratuita a través de los portales, pero que los libros de derecho sí tienen un costo. Abel menciona que consulta páginas como contrataciónestatal.com.co y Norma vigente, las cuales tienen un costo semestralizado. Sin embargo, no se menciona específicamente si tienen suscripciones con empresas."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "Rafael menciona que la información que obtiene de las cortes es gratuita a través de los portales. Sin embargo, también menciona que ha comprado libros de derecho para facilitar su trabajo, aunque no especifica los precios exactos. Además, menciona que tuvo suscripciones con Leggins de Ámbito Jurídico y Legis-Movil en el pasado, pero no continúa con ellas. No se mencionan otras empresas o precios específicos de suscripciones. Por lo tanto, no tengo una respuesta para las preguntas sobre las suscripciones y los costos."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "Viviana menciona que cuando ya conoce los sistemas de búsqueda de las entidades, acceder a la información le sale a cero pesos, es decir, es gratuito. No menciona tener suscripciones actualmente. No se menciona con qué empresas tiene suscripciones ni cuánto cuestan."
+            }
+        ]
+    },
+    {
+        "title": "De la información que está disponible ¿Cree que está completa? ¿actualizada? ¿Qué tan relevante es? ¿Por qué piensa esto? ¿podría darme algunos ejemplos?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "Don Aristarco: En mi opinión, la información disponible en las publicaciones de Legis es completa y actualizada. Siempre he encontrado la información que necesito y considero que es relevante para mis intereses. Por ejemplo, mencioné que consulto las cartillas impresas, la página de internet actualicese.com y la página de la DIAN, y en todas ellas encuentro información actualizada y relevante. Sin embargo, no puedo dar una respuesta definitiva sobre si la información está completa en todos los aspectos, ya que nada es perfecto."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "Maria, no tengo una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "Rafael: Sí, considero que la información disponible está completa y actualizada. Es relevante para mi trabajo como litigante porque necesito estar al tanto de la jurisprudencia y los casos puntuales. No tengo ejemplos específicos en este momento."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "Viviana menciona que la información que utiliza está actualizada y completa. Ella menciona que el Senado tiene una excelente base de datos y que también utiliza el Banco de la República, Súper Sociedades y los boletines de la DIAN para obtener información actualizada y relevante para su trabajo. Sin embargo, no menciona ejemplos específicos de la relevancia de esta información."
+            }
+        ]
+    },
+    {
+        "title": "¿Para qué utiliza esta información?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "Don Aristarco utiliza esta información para temas tributarios, revisoría fiscal y laboral."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "Rafael utiliza esta información para su trabajo como abogado litigante."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "Viviana utiliza esta información para mantenerse informada sobre noticias, columnas de opinión de otros abogados y datos de mercado."
+            }
+        ]
+    },
+    {
+        "title": "¿Por cuáles medios prefiere acceder a la información? ¿Por qué?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "Don Aristarco prefiere acceder a la información a través de medios impresos, como revistas y cartillas. Esto se debe a que está acostumbrado a utilizar material de legis y ha establecido una buena relación con su proveedor en Villavicencio. Además, menciona que las revistas no son costosas y le brindan la utilidad que necesita."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "Maria prefiere acceder a la información de forma impresa. No tengo una respuesta para por qué prefiere acceder de esta manera."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "Rafael prefiere acceder a la información principalmente a través de medios digitales, como páginas web de las altas cortes y otros canales en línea. Él menciona que todo está siendo manejado de manera digital en su trabajo y que es importante estar al tanto de los avances tecnológicos en el campo del derecho. Además, menciona que la información digital es más fácil de acceder y más dinámica. No tengo una respuesta para por qué prefiere acceder a la información de manera digital."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "Viviana prefiere acceder a la información por medios impresos. No se menciona explícitamente por qué prefiere esta forma, pero menciona que le resulta más fácil acceder a lo que busca y que la plataforma digital no es amigable."
+            }
+        ]
+    },
+    {
+        "title": "¿Cómo hace para acceder a este tipo de información?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "Don Aristarco accede a este tipo de información a través de su buena amistad con Alejandra, la niña de Legis en Villavicencio. Él le solicita cualquier material de Legis que necesite y ella se lo envía. También menciona que compra revistas y cartillas laborales de Legis."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "Maria accede a este tipo de información a través de su amistad con Alejandra, quien trabaja en Legis y le proporciona el material que necesita. También menciona que compra revistas y cartillas laborales de Legis."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "Rafael accede a este tipo de información a través de páginas de las altas cortes, boletines que llegan a los correos, grupos de WhatsApp especializados en compartir información jurídica, y servicios como Legis-Movil. También utiliza el buscador de Google para buscar palabras clave relacionadas con el tema jurídico. Además, menciona que la información digital es más accesible y preferible para él debido a los avances tecnológicos en el campo del derecho."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "Viviana accede a este tipo de información a través de bases de datos y bancos de información, donde puede buscar y obtener la información que necesita para su trabajo. No menciona ninguna otra forma específica de acceso a la información."
+            }
+        ]
+    },
+    {
+        "title": "¿Dónde la busca?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "Don Aristarco busca la información en la empresa Legis, específicamente a través de su amistad con Alejandra, la representante de Legis en Villavicencio. También menciona que recibe algunas publicaciones por correo físico."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "Rafael busca la información en las páginas de las altas cortes y también utiliza Google como buscador. No tengo una respuesta para si utiliza otros buscadores o revistas especializadas."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "Viviana busca la información en la plataforma digital."
+            }
+        ]
+    },
+    {
+        "title": "En internet: ¿A través de qué buscadores? ¿Qué tipo de páginas? ¿De qué empresas?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "Don Aristarco menciona que utiliza Google como buscador en internet. También menciona que utiliza la página actualicese.com, que es de la Universidad Central de Contadores. No menciona otras páginas o empresas específicas."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "RAFAEL: Principalmente uso Google como buscador en internet. Además, consulto páginas de altas cortes para buscar información relacionada con jurisprudencia. No utilizo otros buscadores aparte de Google."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "Rafael menciona que utiliza principalmente Google como buscador en internet. No menciona específicamente el uso de otros buscadores. En cuanto a las páginas que utiliza, menciona que visita las páginas de las altas cortes para obtener información veraz y fidedigna. No menciona el nombre de ninguna empresa en particular."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "No tengo una respuesta para eso."
+            }
+        ]
+    },
+    {
+        "title": "Revistas especializadas: ¿Cuáles? ¿Por qué esas? ¿Cada cuánto las recibe?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "RAFAEL: No tengo una respuesta para eso."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "Viviana no menciona ninguna revista especializada en el texto, por lo tanto, no tengo una respuesta para esa pregunta."
+            }
+        ]
+    },
+    {
+        "title": "Periódicos ¿Cuáles? ¿Por qué esas?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "Viviana menciona que le gusta tener su periódico de ámbito jurídico en formato impreso. Sin embargo, no menciona específicamente cuáles son los periódicos que prefiere. Por lo tanto, no tengo una respuesta para eso."
+            }
+        ]
+    },
+    {
+        "title": "Subscripciones a publicaciones especializadas ¿Cuáles? ¿Por qué esas?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "Don Aristarco menciona que se suscribe a la publicación de ámbito jurídico porque es importante para estar al tanto de todos los temas jurídicos y porque tiene columnas especializadas sobre temas de actualidad. No se mencionan otras publicaciones a las que esté suscrito. No se menciona explícitamente por qué elige esa publicación en particular."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "Rafael menciona que estaba suscrito a la publicación especializada \"Ámbito Jurídico\". No menciona ninguna otra suscripción a publicaciones especializadas. No se menciona explícitamente por qué eligió esa publicación en particular."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "Viviana menciona que en el pasado estuvo suscrita a las actualizaciones impresas de los códigos legales, pero no menciona ninguna otra publicación especializada a la que esté suscrita actualmente. No tengo una respuesta para eso."
+            }
+        ]
+    },
+    {
+        "title": "¿Prefiere recibir la información de forma impresa o digital? ¿Por qué?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "Don Aristarco prefiere recibir la información de forma impresa. No tengo una respuesta para el motivo de su preferencia."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "Rafael prefiere recibir la información de forma digital. Él menciona que todo está volviéndose digital en la actualidad, incluyendo los procesos de su oficina y los expedientes en los juzgados. Además, menciona que los abogados no pueden ser ajenos a este cambio y que toda la información llegue de manera digital."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "Viviana prefiere recibir la información de forma impresa. No tengo una respuesta para el motivo por el cual prefiere el formato impreso."
+            }
+        ]
+    },
+    {
+        "title": "Si yo le pregunto por 5 publicaciones (pueden ser impresas, digitales, como usted quiera) en las que usted pueda encontrar este tipo de información ¿cuáles son las primeras que se le vienen a la mente? ¿De quién son?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "Rafael menciona algunas publicaciones en las que puede encontrar información de su interés. Él menciona el boletín de jurisprudencia del Consejo de Estado, el boletín de jurisprudencia de la sala de casación civil de la Corte Suprema, libros de derecho de diferentes editoriales, la editorial del Externado de la Universidad Externado de Colombia, y la revista Doctrina y Ley."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "Viviana menciona que las primeras publicaciones que se le vienen a la mente son las cartillas, las publicaciones de la DIAN, y los boletines de la DIAN. No menciona de quién son las publicaciones adicionales."
+            }
+        ]
+    },
+    {
+        "title": "¿Por qué pensó en estas?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "No tengo una respuesta para eso."
+            }
+        ]
+    },
+    {
+        "title": "¿Conoce las publicaciones de Legis? ¿Por qué no las mencionó antes?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "No tengo una respuesta para eso."
+            }
+        ]
+    },
+    {
+        "title": "Quiero que me diga las 5 primeras cosas que se le vienen a la mente cuando hablamos de Legis",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "Maria: Bueno, cuando pienso en Legis, lo primero que se me viene a la mente es información actualizada. También pienso en que es de fácil acceso, ya que tienen locales bien ubicados. Además, me viene a la mente que tienen una amplia bibliografía de consultas y se actualizan anualmente con cartillas de trabajo. Por último, pienso en las notas de clase que ofrecen, las cuales considero importantes."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "Rafael: Pues me parece que es algo de calidad, es un buen trabajo, está bien organizado, es confiable y tiene información actualizada."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "No tengo una respuesta para eso."
+            }
+        ]
+    },
+    {
+        "title": "¿Por qué piensa eso?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "Viviana piensa eso porque considera que el precio que paga por la suscripción es adecuado y le parece bien. Además, prefiere el pago anual para evitar tener que estar pendiente de pagos mensuales. No menciona ninguna otra razón específica para su opinión."
+            }
+        ]
+    },
+    {
+        "title": "¿Usted contaba con la subscripción de LEGIS para la publicación: ________? ¿Qué piensa sobre esa publicación?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "Rafael, ¿Usted contaba con la subscripción de LEGIS para la publicación: ámbito jurídico? ¿Qué piensa sobre esa publicación?"
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "Viviana, ¿Usted contaba con la subscripción de LEGIS para la publicación: ámbito jurídico? ¿Qué piensa sobre esa publicación? No tengo una respuesta para eso."
+            }
+        ]
+    },
+    {
+        "title": "¿Cuáles son las fortalezas de esa publicación y cuáles son las debilidades? ¿Por qué?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "Rafael menciona que una fortaleza de esa publicación es que está actualizada y recoge todo lo que va saliendo, lo que permite que el abogado esté actualizado. También menciona que otra fortaleza es que a veces trata temas de actualidad y los relaciona con el ámbito jurídico, lo cual considera dinámico. Sin embargo, no menciona ninguna debilidad específica de esa publicación."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "Viviana menciona que las fortalezas de la publicación son que ofrece información confiable y actualizada, tiene buenos títulos en libros y permite acceder a conocimiento en diferentes ramas. Sin embargo, no menciona ninguna debilidad específica de la publicación."
+            }
+        ]
+    },
+    {
+        "title": "Y ahora en general ¿Cuáles son las fortalezas de LEGIS? ¿Cuáles son las debilidades? ¿Por qué? ¿Puede darme algún ejemplo?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "ARISTARCO: En cuanto a las fortalezas de LEGIS, considero que una de ellas es que mantiene actualizado al profesional cada 15 días, brindándole información especializada y de calidad. Además, es una publicación completa y de fácil acceso a través de internet. En cuanto a las debilidades, personalmente no encuentro ninguna, ya que considero que es una herramienta muy importante y completa en mi campo. No puedo dar ejemplos específicos ya que no encuentro debilidades en la publicación."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "Rafael menciona que las fortalezas de LEGIS son su material de calidad, su confiabilidad como marca y su buen posicionamiento en el mercado. Sin embargo, no menciona ninguna debilidad específica de LEGIS. No proporciona ejemplos adicionales."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "Viviana: Las fortalezas de LEGIS son que ofrece información confiable y actualizada, tiene buenos títulos en libros y permite acceder a conocimiento en diferentes ramas. También participan en la feria del libro y tienen precios razonables. En cuanto a las debilidades, Viviana no menciona ninguna."
+            }
+        ]
+    },
+    {
+        "title": "¿Cuál cree usted que es la mayor competencia de LEGIS en relación con la publicación de información como la que estaba en la obra a la que usted estaba subscrito? ¿Por qué piensa esto?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "Maria menciona que la competencia de LEGIS en relación con la publicación de información como la que estaba en la obra a la que ella estaba suscrita podría ser actualicese.com. Sin embargo, no se mencionan otras posibles competencias específicas."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "Viviana menciona que la mayor competencia de LEGIS en relación con la publicación de información como la que estaba en la obra a la que ella estaba suscrita es LEGIS Base. Ella menciona que LEGIS Base también ofrece información actualizada y confiable, por lo que considera que es una competencia para LEGIS."
+            }
+        ]
+    },
+    {
+        "title": "¿Cómo conoció la publicación? ¿Por cuánto tiempo lo tuvo?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "Don Aristarco conoció la publicación a través de la empresa en la que trabajaba y la tuvo durante toda su vida profesional."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "No tengo una respuesta para eso."
+            }
+        ]
+    },
+    {
+        "title": "¿Qué lo atrajo o motivó a subscribirse? ¿Por qué?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "No tengo una respuesta para eso."
+            }
+        ]
+    },
+    {
+        "title": "¿En cuál formato recibe la publicación (físico o digital)? ¿Qué opina sobre esos formatos? ¿cuál es su preferencia, cuál usa más? ¿por qué? ¿qué recomienda?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "Don Aristarco recibe la publicación en formato físico, a través del correo, y opina que le gustaba más en formato físico porque podía revisar rápidamente los temas nuevos. Su preferencia es el formato físico y lo utiliza más. Recomienda a sus estudiantes suscribirse a la publicación en formato físico debido a su importancia y precio especial."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "Rafael recibe la publicación en formato físico. Opina que ambos formatos tienen sus ventajas, pero prefiere el formato digital debido a la facilidad de acceso y la posibilidad de almacenar la información en la nube. Él usa más el formato digital debido a la digitalización de los procesos en su trabajo como abogado. No tengo una respuesta para qué recomienda."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "Viviana recibe la publicación en formato impreso. Ella opina que le gusta más en formato físico que en digital. Su preferencia es utilizar el formato impreso porque le parece más cómodo y seguro tener la información actualizada. No se menciona qué recomienda."
+            }
+        ]
+    },
+    {
+        "title": "¿Cómo le parecía la publicación? ¿Qué era lo bueno? ¿Qué era lo malo? ¿Qué era lo que más le gustaba? ¿Por qué?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "Don Aristarco consideraba que la publicación era buena y confiable. Lo que más le gustaba era que la información era actualizada y completa. No mencionó específicamente lo que consideraba malo de la publicación."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "Rafael menciona que le parecía buena la publicación de ámbito jurídico porque era confiable, de calidad y actualizada. No menciona lo malo de la publicación ni lo que más le gustaba."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "Viviana le parecía que la publicación era buena y útil. Lo bueno era que le parecía que tenía un precio bueno y le gustaba recibir el papel y la experiencia de leerlo, ya que le permitía desconectarse y sumergirse en la información. Lo malo era que no le parecía fácil acceder a lo que buscaba en la plataforma digital y a veces no le dejaba acceder. Lo que más le gustaba era la actualización que recibía a través de la publicación. No tengo una respuesta para por qué le gustaba recibirlo en papel."
+            }
+        ]
+    },
+    {
+        "title": "¿Usted llegó a recomendarle la publicación a algún amigo o colega? ¿Por qué?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "Sí, lo he hecho. La recomendaría porque es una publicación confiable y de calidad, actualizada y reconocida en el ámbito jurídico, especialmente entre los abogados."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "No tengo una respuesta para eso."
+            }
+        ]
+    },
+    {
+        "title": "Si en este momento usted me fuera a hablar de esa publicación ¿qué me diría?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "No tengo una respuesta para eso."
+            }
+        ]
+    },
+    {
+        "title": "¿Qué tipo de beneficios obtendría si me subscribiera a esa publicación?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "ARISTARCO: Pues el beneficio de obtener la información actualizada."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "Viviana menciona que no había ningún beneficio al tener la suscripción a la publicación de ámbito jurídico."
+            }
+        ]
+    },
+    {
+        "title": "¿A qué tendría acceso?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "Don Aristarco tendría acceso a toda la normatividad legal, tanto en formato físico como a través de internet. También menciona que puede consultar información en publicaciones impresas como las cartillas y en la página de internet actualicese.com. Además, menciona que en algún momento también tuvo acceso a información de la junta central de contadores."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "Rafael tendría acceso a información relacionada con jurisprudencia y doctrina jurídica, especialmente de las altas cortes en Colombia."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "Viviana tendría acceso a noticias, columnas de opinión de otros abogados, datos de mercado y cursos."
+            }
+        ]
+    },
+    {
+        "title": "¿Cada cuánto recibiría esta información?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "Viviana recibía la información cada mes."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "Viviana recibía esta información cada mes."
+            }
+        ]
+    },
+    {
+        "title": "¿Por cuáles medios podría consultar la información?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "Don Aristarco podría consultar la información a través de publicaciones impresas como las cartillas mencionadas, la página de internet actualicese.com y la página de la DIAN. También menciona la posibilidad de encontrar información en la junta central de contadores."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "Maria podría consultar la información a través de páginas de internet como contrataciónestatalcom.co y Norma vigente, así como en las páginas del periódico de ámbito jurídico. También podría buscar información en las páginas de las altas cortes y utilizar buscadores como Google. Además, podría consultar revistas especializadas y periódicos."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "Rafael podría consultar la información a través de las páginas de las altas cortes, buscadores como Google, revistas especializadas, periódicos y literatura jurídica."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "Viviana podría consultar la información a través de medios como el periódico de ámbito jurídico en formato impreso."
+            }
+        ]
+    },
+    {
+        "title": "¿Tendría alguna ventaja por tener mi suscripción con LEGIS? ¿Cuál?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "ABEL: Pues como le dije, la ventaja es que tiene acceso a la página electrónica y a ciertos servicios. Además, también tiene el servicio de domicilio donde le llegan en físico el periódico a la oficina o a la vivienda."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "Rafael: Sí, una ventaja sería tener acceso a información actualizada y relevante en el ámbito jurídico, como boletines y sentencias resumidas. También podría consultar la información a través del correo electrónico. Además, obtuve un descuento por comprar la suscripción por dos años en un solo pago."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "Viviana menciona que no había ningún beneficio por tener la suscripción con LEGIS. No menciona ninguna ventaja específica."
+            }
+        ]
+    },
+    {
+        "title": "¿Cuánto tendría que pagar?",
+        "respuestas": [
+            {
+                "name": "Don Aristarco",
+                "respuesta": "ARISTARCO: Por la última suscripción pagué alrededor de 500, no recuerdo exactamente."
+            },
+            {
+                "name": "Maria",
+                "respuesta": "No tengo una respuesta para eso."
+            },
+            {
+                "name": "Rafael",
+                "respuesta": "Rafael: Si no estoy mal pagaba 120,000 o 130,000 anuales."
+            },
+            {
+                "name": "Viviana",
+                "respuesta": "No tengo una respuesta para eso."
+            }
+        ]
+    }
+]

@@ -9,6 +9,7 @@ import supabaseClient from '@/lib/supabase'
 import '@/styles/chat.css'
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
+import CHARTS from '@/data/data.json'
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
@@ -135,6 +136,11 @@ export default function Chat() {
         setLoadModalVisible(true);
         setIsLoading(true);
 
+        // if (projects[0].name === 'Probando') {
+        //     alert('it is')
+        //     return
+        // }
+
         try {
             const response = await fetch(`/api/table`, {
                 method: 'POST',
@@ -145,7 +151,7 @@ export default function Chat() {
             })
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data);
+                    // console.log(data);
                     setEntrevistaData(data);
                     setTableFinished(true)
                     setLoadModalVisible(false)
@@ -221,6 +227,14 @@ export default function Chat() {
         fetchProjects()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
+
+    useEffect(() => {
+        if (projects[0]?.name === 'Probando') {
+            
+            setEntrevistaData(CHARTS);
+            setTableFinished(true)
+        }
+    }, [data, projects]);
 
     const fetchProjects = async () => {
         const projectId = pathname?.split('/')[2];
