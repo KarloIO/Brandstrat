@@ -166,8 +166,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             const respuesta: any = await chain.call({ query: `${preguntaPersonalizada}, asegurate de entender bien lo que dice cada entrevistado para no dar una respuesta erronea, siempre responde en español` })
 
 
+                            let respuestaUsuario;
                             try {
                                 JSON.parse(respuesta);
+                                respuestaUsuario = respuesta.text;
                             } catch (e) {
                                 console.error('La respuesta no es un JSON válido:', respuesta);
                                 // Aquí puedes manejar el error de la manera que prefieras. Por ejemplo, podrías:
@@ -175,9 +177,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                 // - Intentar recuperarte del error y continuar con la ejecución del programa
                                 // - Registrar el error en un sistema de seguimiento de errores para su posterior análisis
                                 // Por ahora, simplemente vamos a devolver una respuesta vacía:
-                                return { name: usuario, respuesta: "" };
+                                respuestaUsuario = "No hay contexto sobre eso";
                             }
-                            const respuestaUsuario = respuesta.text;
 
                             usuarios[usuario].respuestaPorUsuario = respuestaUsuario;
 
