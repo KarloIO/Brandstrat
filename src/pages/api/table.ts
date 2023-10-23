@@ -171,12 +171,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                 JSON.parse(respuesta);
                                 respuestaUsuario = respuesta.text;
                             } catch (e) {
-                                console.error('La respuesta no es un JSON válido:', respuesta);
-                                // Aquí puedes manejar el error de la manera que prefieras. Por ejemplo, podrías:
-                                // - Devolver una respuesta de error personalizada al cliente
-                                // - Intentar recuperarte del error y continuar con la ejecución del programa
-                                // - Registrar el error en un sistema de seguimiento de errores para su posterior análisis
-                                // Por ahora, simplemente vamos a devolver una respuesta vacía:
+                                console.error('La respuesta no es un JSON válido:', e);
                                 respuestaUsuario = "No hay contexto sobre eso";
                             }
 

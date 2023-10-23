@@ -136,10 +136,10 @@ export default function Chat() {
                     setLoadModalVisible(false)
                     return data;
                 })
-                .catch(error => console.error('Hubo un error:', error));
+                .catch(error => console.log(error));
             console.log(response);
         } catch (error) {
-            console.error('Hubo un error:', error);
+            console.error(error);
         }
     };
 
