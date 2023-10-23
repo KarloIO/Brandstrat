@@ -130,6 +130,7 @@ export default function Chat() {
             const response = await fetch(`/api/table`)
                 .then(response => response.json())
                 .then(data => {
+                    console.log(data);
                     setEntrevistaData(data);
                     setTableFinished(true)
                     setLoadModalVisible(false)
@@ -595,7 +596,7 @@ export default function Chat() {
                 {isTableFinished ? (
                     <div className="w-full h-full bg-white flex flex-col gap-5 items-center justify-start rounded-lg border-x-1 border-t-1 border-b-2 border-[#E0E0E0] md:min-w-[300px]">
 
-                        <div className="w-full min-h-[56px] rounded-t-lg border-b-2 border-[#EFF0F3] flex flex-row p-5 items-center justify-between cursor-default">
+                        <div className="w-full min-h-[56px] rounded-t-lg border-b-2 border-[#EFF0F3] flex flex-row px-5 py-1 items-center justify-between cursor-default">
 
                             <span className=" text-base font-bold text-[#131315]">Tabla generada automáticamente</span>
 
@@ -603,9 +604,9 @@ export default function Chat() {
 
                         </div>
 
-                        <div className="w-full h-full px-5 pb-5 gap-5 flex flex-col">
+                        <div className="w-full h-full px-5 pb-5 gap-2 flex flex-col">
 
-                            <div className="w-full min-h-[32px] max-h-[32px] flex flex-row p-2 items-center justify-between cursor-default ">
+                            <div className="w-full min-h-[32px] max-h-[32px] flex flex-row p-2 items-center justify-between cursor-default">
 
                                 <span className=" text-base font-bold text-[#F29545]">Tabla Completa</span>
 
@@ -619,14 +620,14 @@ export default function Chat() {
 
                                 <div className="questions w-1/3 h-full rounded-s-lg flex flex-col items-start justify-start gap-2 p-2 max-h-[488px] overflow-auto" dir="rtl">
 
-                                    {entrevistaData.map((preguntaData, index) => (
+                                    {entrevistaData?.map((preguntaData, index) => (
                                         <div
                                             key={index}
-                                            className={`w-full h-auto min-h-[52px] flex flex-col items-start justify-center p-4 gap-2 rounded-md cursor-pointer hover:font-semibold duration-200 ${preguntaData === preguntaSeleccionada ? 'bg-[#F9CAA2]' : 'hover:bg-[#FDEBDC]'} ${preguntaData === preguntaSeleccionada ? ' font-semibold' : ' font-normal'}`}
+                                            className={`w-full h-auto flex flex-col items-start justify-start p-4 gap-2 rounded-md cursor-pointer hover:font-semibold duration-200 ${preguntaData === preguntaSeleccionada ? 'bg-[#F9CAA2]' : 'hover:bg-[#FDEBDC]'} ${preguntaData === preguntaSeleccionada ? ' font-semibold' : ' font-normal'}`}
                                             onClick={() => setPreguntaSeleccionada(preguntaData)}
                                             dir="ltr"
                                         >
-                                            <span>{preguntaData.title}</span>
+                                            <span>{preguntaData?.title}</span>
                                         </div>
                                     ))}
 
@@ -634,17 +635,17 @@ export default function Chat() {
 
                                 <div className="w-2/3 h-full min-h-[488px] bg-[#EFF0F3] rounded-e-lg flex flex-row gap-2 p-2 items-start justify-start overflow-x-auto">
 
-                                    {preguntaSeleccionada && preguntaSeleccionada.respuestas.map((respuesta, index) => (
+                                    {preguntaSeleccionada && preguntaSeleccionada?.respuestas?.map((respuesta, index) => (
                                         <div key={index} className="w-full min-h-[36px] flex flex-col items-start justify-start rounded-md bg-[#EFF0F3] cursor-default h-full gap-2 p-2">
                                             <div className="w-full min-w-[256px] h-full max-h-[36px] flex items-center justify-center rounded-md px-3 py-2 bg-white cursor-default">
-                                                <span className=" text-base font-medium text-[#131315]">{respuesta.name}</span>
+                                                <span className=" text-base font-medium text-[#131315]">{respuesta?.name}</span>
                                             </div>
-                                            <div className=" overflow-y-auto w-full h-full max-h-[420px] p-4 bg-white rounded-lg flex items-center">
+                                            <div className="answer overflow-y-auto w-full h-full max-h-[420px] p-4 bg-white rounded-lg flex items-start">
                                                 <div className="h-full mt-3 px-2">
-                                                    {respuesta.respuesta && respuesta.respuesta.split('.').filter(sentence => sentence.trim() !== '').map((sentence, index) => (
+                                                    {respuesta.respuesta && respuesta?.respuesta.split('.').filter(sentence => sentence.trim() !== '').map((sentence, index) => (
                                                         <React.Fragment key={index}>
                                                             <p className=" text-base font-normal text-[#131315]">{sentence + '.'}</p>
-                                                            {index !== respuesta.respuesta.split('.').length - 2 && <br />}
+                                                            {index !== respuesta?.respuesta.split('.').length - 2 && <br />}
                                                         </React.Fragment>
                                                     ))}
                                                 </div>

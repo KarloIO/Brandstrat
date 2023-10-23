@@ -49,8 +49,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     return data.text;
                 });
                 
-                const textos = await Promise.all(descargas);
-                // console.log(textos);
             
                 const information = await Promise.all(descargas);
 
@@ -66,10 +64,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 // console.log(chunks);
 
                 const model = new OpenAI({
+                    modelName: "gpt-3.5-turbo-16k",
                     temperature: 0.0,
                 });
 
-                const memory = new BufferWindowMemory({ k: 1 })
+                const memory = new BufferWindowMemory({ k: 12 })
 
                 const vectorStore = await MemoryVectorStore.fromDocuments(
                     chunks,
@@ -81,22 +80,56 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const usuarios: { [key: string]: any } = {};
 
                 const obtenerNombresEntrevistados = async () => {
-                    const consultaEntrevistados = "¿Quiénes son todos los entrevistados?";
+                    const consultaEntrevistados = "¿Quiénes son todos los entrevistados? muestralos divididos por comas, no incluyas un 'y', asegurate de entender quienes son los entrevistados y quienes lo entrevistadores, esos ultimos no los menciones";
                     const respuesta: any = await chain.call({ query: consultaEntrevistados });
-                    let respuestasEntrevistados = respuesta.text.split(', ');
-                    respuestasEntrevistados = respuestasEntrevistados.map((nombre: string) => nombre.replace(/y /g, '').trim());
-                    console.log("Nombres de los entrevistados: ", respuestasEntrevistados.join(', '));
-                    return respuestasEntrevistados;
+                    console.log(respuesta)
+                    let nombres = respuesta.text.split(',').map((nombre: string) => nombre.trim());
+                    console.log("Nombres de los entrevistados: ", nombres.join(', '));
+                    return nombres;
                 }
 
                 const entrevistados = await obtenerNombresEntrevistados();
                 for (const entrevistado of entrevistados) {
-                    usuarios[entrevistado] = { respuestaPorUsuario: "" };
+                    if (typeof entrevistado === 'string') {
+                        usuarios[entrevistado] = { respuestaPorUsuario: "" };
+                    }
                 }
 
                 const preguntas = [
                     "¿Cuáles son los temas jurídicos/contables que más le interesan? ¿Alguna razón particular?",
                     "¿Qué tan fácil es acceder a este tipo de información? ¿Por qué cree eso?",
+                    "En tema de costo… ¿Qué tan caro es encontrar la información que le interesa? ¿Tiene suscripciones? ¿Con qué empresas? ¿Cuánto cuestan?",
+                    "De la información que está disponible ¿Cree que está completa? ¿actualizada? ¿Qué tan relevante es? ¿Por qué piensa esto? ¿podría darme algunos ejemplos?",
+                    "¿Para qué utiliza esta información?",
+                    "¿Por cuáles medios prefiere acceder a la información? ¿Por qué?",
+                    "¿Cómo hace para acceder a este tipo de información?",
+                    "¿Dónde la busca?",
+                    "En internet: ¿A través de qué buscadores? ¿Qué tipo de páginas? ¿De qué empresas?",
+                    "Revistas especializadas: ¿Cuáles? ¿Por qué esas? ¿Cada cuánto las recibe?",
+                    "Periódicos ¿Cuáles? ¿Por qué esas?",
+                    "Subscripciones a publicaciones especializadas ¿Cuáles? ¿Por qué esas?",
+                    "¿Prefiere recibir la información de forma impresa o digital? ¿Por qué?",
+                    "Si yo le pregunto por 5 publicaciones (pueden ser impresas, digitales, como usted quiera) en las que usted pueda encontrar este tipo de información ¿cuáles son las primeras que se le vienen a la mente? ¿De quién son?",
+                    "¿Por qué pensó en estas?",
+                    "¿Conoce las publicaciones de Legis? ¿Por qué no las mencionó antes?",
+                    "Quiero que me diga las 5 primeras cosas que se le vienen a la mente cuando hablamos de Legis",
+                    "¿Por qué piensa eso?",
+                    "¿Usted contaba con la subscripción de LEGIS para la publicación: ________? ¿Qué piensa sobre esa publicación?",
+                    "¿Cuáles son las fortalezas de esa publicación y cuáles son las debilidades? ¿Por qué?",
+                    "Y ahora en general ¿Cuáles son las fortalezas de LEGIS? ¿Cuáles son las debilidades? ¿Por qué? ¿Puede darme algún ejemplo?",
+                    "¿Cuál cree usted que es la mayor competencia de LEGIS en relación con la publicación de información como la que estaba en la obra a la que usted estaba subscrito? ¿Por qué piensa esto?",
+                    "¿Cómo conoció la publicación? ¿Por cuánto tiempo lo tuvo?",
+                    "¿Qué lo atrajo o motivó a subscribirse? ¿Por qué?",
+                    "¿En cuál formato recibe la publicación (físico o digital)? ¿Qué opina sobre esos formatos? ¿cuál es su preferencia, cuál usa más? ¿por qué? ¿qué recomienda?",
+                    "¿Cómo le parecía la publicación? ¿Qué era lo bueno? ¿Qué era lo malo? ¿Qué era lo que más le gustaba? ¿Por qué?",
+                    "¿Usted llegó a recomendarle la publicación a algún amigo o colega? ¿Por qué?",
+                    "Si en este momento usted me fuera a hablar de esa publicación ¿qué me diría?",
+                    "¿Qué tipo de beneficios obtendría si me subscribiera a esa publicación?",
+                    "¿A qué tendría acceso?",
+                    "¿Cada cuánto recibiría esta información?",
+                    "¿Por cuáles medios podría consultar la información?",
+                    "¿Tendría alguna ventaja por tener mi suscripción con LEGIS? ¿Cuál?",
+                    "¿Cuánto tendría que pagar?"
                 ];
                 
                 const todasLasRespuestas: any[] = [];
@@ -108,9 +141,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 for (const pregunta of preguntas) {
                     const respuestasPorPregunta: any[] = Array(Object.keys(usuarios).length).fill(null);
                     const promesas = Object.keys(usuarios).map(async usuario => {
-                        const preguntaPersonalizada = `${pregunta}, si no lo sabe solo diga: "no tengo una respuesta para eso"}`;
+                        const preguntaPersonalizada = `${usuario}, ${pregunta}, si no lo sabe solo diga: "no tengo una respuesta para eso"}`;
 
-                        const respuesta: any = await chain.call({ query: preguntaPersonalizada })
+                        await new Promise(resolve => setTimeout(resolve, 1500));
+                        const respuesta: any = await chain.call({ query: `${preguntaPersonalizada}, asegurate de entender bien lo que dice cada entrevistado para no dar una respuesta erronea, siempre responde en español` })
 
                         const respuestaUsuario = respuesta.text;
                         usuarios[usuario].respuestaPorUsuario = respuestaUsuario;
@@ -142,15 +176,3 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(500).json({ error: 'Ehh, yo digo que chale homs' });
     }
 }
-
-
-
-
-// export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-//     try {
-//         res.status(200).json({ message: "Okay, la operación se completó con éxito." });
-//     } catch (error) {
-//         console.error("Error en el bot:", error);
-//         res.status(500).json({ error: 'Hubo un error en el servidor' });
-//     }
-// }

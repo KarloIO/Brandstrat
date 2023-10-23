@@ -89,3 +89,18 @@
     background-color: #E0E0E0;
     border-radius: 4px;
 }
+
+.answer::-webkit-scrollbar {
+    color: #FFF;
+    width: 8px;
+    padding-left: 8px;
+}
+
+.answer::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+.answer::-webkit-scrollbar-thumb {
+    background-color: #F9CAA2;
+    border-radius: 4px;
+}
