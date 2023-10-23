@@ -161,26 +161,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         const respuestasPorPregunta: any[] = Array(Object.keys(usuarios).length).fill(null);
                         const promesas = Object.keys(usuarios).map(async (usuario: any) => {
                             const preguntaPersonalizada = `${usuario}, ${pregunta}, si no lo sabe solo diga: "no tengo una respuesta para eso"}`;
-
+                    
                             const respuesta: any = await chain.call({ query: `${preguntaPersonalizada}, asegurate de entender bien lo que dice cada entrevistado para no dar una respuesta erronea, siempre responde en español` })
                             console.log(respuesta);
-
+                    
                             let respuestaUsuario;
                             try {
-                                    respuestaUsuario = JSON.parse(respuesta).text;
-
+                                respuestaUsuario = respuesta.text;
                             } catch (error) {
                                 console.error('Error al procesar la respuesta:', error);
                                 respuestaUsuario = "No hay contexto sobre eso";
                             }
-
+                    
                             usuarios[usuario].respuestaPorUsuario = respuestaUsuario;
-
+                    
                             respuestasPorPregunta[usuarioIndices[usuario]] = { name: usuario, respuesta: respuestaUsuario };
-
+                    
                             return { name: usuario, respuesta: respuestaUsuario };
                         });
-
+                    
                         await Promise.all(promesas);
                         todasLasRespuestas.push({ title: pregunta, respuestas: respuestasPorPregunta });
                     }
