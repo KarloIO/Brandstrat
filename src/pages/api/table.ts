@@ -159,19 +159,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     for (const pregunta of preguntas) {
                         console.log(`------ Procesando pregunta: ${pregunta} ------`);
                         const respuestasPorPregunta: any[] = Array(Object.keys(usuarios).length).fill(null);
-                        const promesas = Object.keys(usuarios).map(async usuario => {
+                        const promesas = Object.keys(usuarios).map(async (usuario: any) => {
                             const preguntaPersonalizada = `${usuario}, ${pregunta}, si no lo sabe solo diga: "no tengo una respuesta para eso"}`;
 
-                            await new Promise(resolve => setTimeout(resolve, 1500));
                             const respuesta: any = await chain.call({ query: `${preguntaPersonalizada}, asegurate de entender bien lo que dice cada entrevistado para no dar una respuesta erronea, siempre responde en español` })
+                            console.log(respuesta);
 
                             function esJsonValido(str: any) {
                                 try {
                                     JSON.parse(str);
+                                    return true;
                                 } catch (e) {
                                     return false;
                                 }
-                                return true;
                             }
 
                             let respuestaUsuario;
