@@ -13,6 +13,7 @@ import pdfParse from 'pdf-parse';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     try {
+        console.log('------ Iniciando la obtención de datos ------');
         const { data, error } = await supabaseClient
             .storage
             .from('Probando')
@@ -20,15 +21,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 limit: 100,
                 offset: 0
             })
+        console.log('------ Datos obtenidos ------');
         if (Array.isArray(data)) {
             const nombresArchivos = data.map(archivo => archivo.name);
-            console.log(nombresArchivos);
+            console.log('------ Nombres de archivos obtenidos ------', nombresArchivos);
 
             if (error) {
+                console.log('------ Error obtenido ------', error);
                 throw error;
             }
 
             if (Array.isArray(nombresArchivos)) {
+                console.log('------ Iniciando descargas ------');
                 const descargas = nombresArchivos.map(async (nombreArchivo) => {
                     const { data: archivo, error: errorDescarga } = await supabaseClient
                         .storage
@@ -41,64 +45,73 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }
 
                     // Convertir Blob a base64
+                    console.log('------ Convirtiendo Blob a base64 ------');
                     const arrayBuffer = await archivo.arrayBuffer();
                     const buffer = Buffer.from(arrayBuffer);
 
                     // Convertir base64 a texto legible
+                    console.log('------ Convirtiendo base64 a texto legible ------');
                     const data = await pdfParse(buffer);
                     return data.text;
                 });
 
-
+                console.log('------ Descargas completadas ------');
                 const information = await Promise.all(descargas);
 
+                console.log('------ Iniciando el splitter ------');
                 const splitter = new RecursiveCharacterTextSplitter({
                     chunkSize: 2000,
                     chunkOverlap: 400,
                 })
 
+                console.log('------ Creando chunks ------');
                 const chunks = await splitter.splitDocuments([
                     new Document({ pageContent: information.join(' ') })
                 ])
 
-                // console.log(chunks);
+                console.log('------ Chunks creados ------');
 
+                console.log('------ Iniciando el modelo ------');
                 const model = new OpenAI({
                     modelName: "gpt-3.5-turbo-16k",
                     temperature: 0.0,
                 });
 
+                console.log('------ Creando memoria ------');
                 const memory = new BufferWindowMemory({ k: 12 })
 
+                console.log('------ Creando vectorStore ------');
                 const vectorStore = await MemoryVectorStore.fromDocuments(
                     chunks,
                     new OpenAIEmbeddings(),
                 );
 
+                console.log('------ Creando cadena ------');
                 const chain = RetrievalQAChain.fromLLM(model, vectorStore.asRetriever(), memory)
 
+                console.log('------ Creando usuarios ------');
                 const usuarios: { [key: string]: any } = {};
 
                 const obtenerNombresEntrevistados = async () => {
+                    console.log('------ Obteniendo nombres de los entrevistados ------');
                     const consultaEntrevistados = "¿Quiénes son todos los entrevistados? muestralos divididos por comas, no incluyas un 'y', asegurate de entender quienes son los entrevistados y quienes lo entrevistadores, esos ultimos no los menciones";
                     const respuesta: any = await chain.call({ query: consultaEntrevistados });
-                    console.log(respuesta)
+                    console.log('------ Respuesta obtenida ------', respuesta);
                     let nombres = respuesta.text.split(',').map((nombre: string) => nombre.trim());
                     console.log("Nombres de los entrevistados: ", nombres.join(', '));
                     return nombres;
                 }
 
-
-
                 try {
+                    console.log('------ Obteniendo entrevistados ------');
                     const entrevistados = await obtenerNombresEntrevistados();
-                    console.log(entrevistados)
                     for (const entrevistado of entrevistados) {
                         if (typeof entrevistado === 'string') {
                             usuarios[entrevistado] = { respuestaPorUsuario: "" };
                         }
                     }
 
+                    console.log('------ Creando preguntas ------');
                     const preguntas = [
                         "¿Cuáles son los temas jurídicos/contables que más le interesan? ¿Alguna razón particular?",
                         "¿Qué tan fácil es acceder a este tipo de información? ¿Por qué cree eso?",
@@ -136,22 +149,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         "¿Cuánto tendría que pagar?"
                     ];
 
-                    console.log(preguntas)
-
+                    console.log('------ Iniciando respuestas ------');
                     const todasLasRespuestas: any[] = [];
                     const usuarioIndices = Object.keys(usuarios).reduce((acc: { [key: string]: number }, usuario: string, index: number) => {
                         acc[usuario] = index;
                         return acc;
                     }, {});
 
-                    console.log(usuarioIndices)
-
                     for (const pregunta of preguntas) {
+                        console.log(`------ Procesando pregunta: ${pregunta} ------`);
                         const respuestasPorPregunta: any[] = Array(Object.keys(usuarios).length).fill(null);
                         const promesas = Object.keys(usuarios).map(async usuario => {
                             const preguntaPersonalizada = `${usuario}, ${pregunta}, si no lo sabe solo diga: "no tengo una respuesta para eso"}`;
-
-                                console.log([preguntaPersonalizada])
 
                             await new Promise(resolve => setTimeout(resolve, 1500));
                             const respuesta: any = await chain.call({ query: `${preguntaPersonalizada}, asegurate de entender bien lo que dice cada entrevistado para no dar una respuesta erronea, siempre responde en español` })
@@ -172,7 +181,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         todasLasRespuestas.push({ title: pregunta, respuestas: respuestasPorPregunta });
                     }
 
-                    console.log(todasLasRespuestas);
+                    console.log('------ Todas las respuestas obtenidas ------', todasLasRespuestas);
 
                     res.status(200).json(todasLasRespuestas);
                 } catch (error) {
