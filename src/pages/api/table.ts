@@ -105,7 +105,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                     const preguntas = [
                         "¿Cuáles son los temas jurídicos/contables que más le interesan? ¿Alguna razón particular?",
-                        "¿Qué tan fácil es acceder a este tipo de información? ¿Por qué cree eso?",
+                        // "¿Qué tan fácil es acceder a este tipo de información? ¿Por qué cree eso?",
                         // "En tema de costo… ¿Qué tan caro es encontrar la información que le interesa? ¿Tiene suscripciones? ¿Con qué empresas? ¿Cuánto cuestan?",
                         // "De la información que está disponible ¿Cree que está completa? ¿actualizada? ¿Qué tan relevante es? ¿Por qué piensa esto? ¿podría darme algunos ejemplos?",
                         // "¿Para qué utiliza esta información?",
