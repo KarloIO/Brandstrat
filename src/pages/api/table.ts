@@ -178,7 +178,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             if (esJsonValido(respuesta)) {
                                 respuestaUsuario = JSON.parse(respuesta).text;
                             } else {
-                                console.error('La respuesta no es un JSON válido:', respuesta);
+                                console.error('La respuesta no es un JSON válido:', error);
                                 respuestaUsuario = "No hay contexto sobre eso";
                             }
 
