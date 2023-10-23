@@ -165,13 +165,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             await new Promise(resolve => setTimeout(resolve, 1500));
                             const respuesta: any = await chain.call({ query: `${preguntaPersonalizada}, asegurate de entender bien lo que dice cada entrevistado para no dar una respuesta erronea, siempre responde en español` })
 
+                            function esJsonValido(str: any) {
+                                try {
+                                    JSON.parse(str);
+                                } catch (e) {
+                                    return false;
+                                }
+                                return true;
+                            }
 
                             let respuestaUsuario;
-                            try {
-                                JSON.parse(respuesta);
-                                respuestaUsuario = respuesta.text;
-                            } catch (e) {
-                                console.error('La respuesta no es un JSON válido:', e);
+                            if (esJsonValido(respuesta)) {
+                                respuestaUsuario = JSON.parse(respuesta).text;
+                            } else {
+                                console.error('La respuesta no es un JSON válido:', respuesta);
                                 respuestaUsuario = "No hay contexto sobre eso";
                             }
 
