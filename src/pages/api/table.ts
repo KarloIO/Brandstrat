@@ -175,10 +175,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             }
 
                             let respuestaUsuario;
-                            if (esJsonValido(respuesta)) {
-                                respuestaUsuario = JSON.parse(respuesta).text;
-                            } else {
-                                console.error('La respuesta no es un JSON válido:', error);
+                            try {
+                                if (esJsonValido(respuesta)) {
+                                    respuestaUsuario = JSON.parse(respuesta).text;
+                                } else {
+                                    respuestaUsuario = "No hay contexto sobre eso";
+                                }
+                            } catch (error) {
+                                console.error('Error al procesar la respuesta:', error);
                                 respuestaUsuario = "No hay contexto sobre eso";
                             }
 
