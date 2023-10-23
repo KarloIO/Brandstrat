@@ -165,22 +165,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             const respuesta: any = await chain.call({ query: `${preguntaPersonalizada}, asegurate de entender bien lo que dice cada entrevistado para no dar una respuesta erronea, siempre responde en español` })
                             console.log(respuesta);
 
-                            function esJsonValido(str: any) {
-                                try {
-                                    JSON.parse(str);
-                                    return true;
-                                } catch (e) {
-                                    return false;
-                                }
-                            }
-
                             let respuestaUsuario;
                             try {
-                                if (esJsonValido(respuesta)) {
                                     respuestaUsuario = JSON.parse(respuesta).text;
-                                } else {
-                                    respuestaUsuario = "No hay contexto sobre eso";
-                                }
+
                             } catch (error) {
                                 console.error('Error al procesar la respuesta:', error);
                                 respuestaUsuario = "No hay contexto sobre eso";
@@ -188,11 +176,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                             usuarios[usuario].respuestaPorUsuario = respuestaUsuario;
 
-                            if (Array.isArray(respuestasPorPregunta)) {
-                                respuestasPorPregunta[usuarioIndices[usuario]] = { name: usuario, respuesta: respuestaUsuario };
-                            } else {
-                                console.error('Error: respuestasPorPregunta no es un array');
-                            }
+                            respuestasPorPregunta[usuarioIndices[usuario]] = { name: usuario, respuesta: respuestaUsuario };
 
                             return { name: usuario, respuesta: respuestaUsuario };
                         });
