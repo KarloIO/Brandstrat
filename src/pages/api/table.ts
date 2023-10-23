@@ -165,30 +165,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             await new Promise(resolve => setTimeout(resolve, 1500));
                             const respuesta: any = await chain.call({ query: `${preguntaPersonalizada}, asegurate de entender bien lo que dice cada entrevistado para no dar una respuesta erronea, siempre responde en español` })
 
-                            let respuestaUsuario;
-                            
-                            if (typeof respuesta === 'string') {
-                                respuestaUsuario = respuesta;
-                            } else if (typeof respuesta === 'object' && respuesta !== null && 'text' in respuesta) {
-                                respuestaUsuario = respuesta.text;
-                            } else {
-                                console.error('La respuesta no es una cadena ni un objeto válido:', respuesta);
-                                throw new Error('Respuesta inválida');
+
+                            try {
+                                JSON.parse(respuesta);
+                            } catch (e) {
+                                console.error('La respuesta no es un JSON válido:', respuesta);
+                                // Aquí puedes manejar el error de la manera que prefieras. Por ejemplo, podrías:
+                                // - Devolver una respuesta de error personalizada al cliente
+                                // - Intentar recuperarte del error y continuar con la ejecución del programa
+                                // - Registrar el error en un sistema de seguimiento de errores para su posterior análisis
+                                // Por ahora, simplemente vamos a devolver una respuesta vacía:
+                                return { name: usuario, respuesta: "" };
                             }
-                            
+                            const respuestaUsuario = respuesta.text;
+
                             usuarios[usuario].respuestaPorUsuario = respuestaUsuario;
-                            
+
                             if (Array.isArray(respuestasPorPregunta)) {
                                 respuestasPorPregunta[usuarioIndices[usuario]] = { name: usuario, respuesta: respuestaUsuario };
                             } else {
                                 console.error('Error: respuestasPorPregunta no es un array');
                             }
-                            
+
                             return { name: usuario, respuesta: respuestaUsuario };
-                            });
-                            
-                            await Promise.all(promesas);
-                            todasLasRespuestas.push({ title: pregunta, respuestas: respuestasPorPregunta });
+                        });
+
+                        await Promise.all(promesas);
+                        todasLasRespuestas.push({ title: pregunta, respuestas: respuestasPorPregunta });
                     }
 
                     console.log('------ Todas las respuestas obtenidas ------', todasLasRespuestas);
