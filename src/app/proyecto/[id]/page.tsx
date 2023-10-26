@@ -230,7 +230,7 @@ export default function Chat() {
 
     useEffect(() => {
         if (projects[0]?.name === 'Probando') {
-            
+
             setEntrevistaData(CHARTS);
             setTableFinished(true)
         }
@@ -248,7 +248,7 @@ export default function Chat() {
         } else {
             setProjects(data)
             const questions = data[0]?.questions || [];
-            console.log(questions)
+            console.log("Preguntas cargadas desde Supabase:", data);
             setQuestions(questions.flat());
         }
     }
@@ -278,7 +278,7 @@ export default function Chat() {
     }
 
     const updateProjectQuestions = async (files: FileWithId[], url: string) => {
-        const newQuestions = files.map(file => [({ name: file.name, size: parseFloat((file.size / (1024 * 1024)).toFixed(2)), url: url })]);
+        const newQuestions = files.map(file => [({ name: file.name, size: (file.size / (1024 * 1024)), url: url })]);
 
         console.log(newQuestions)
         console.log(projects[0].name)
@@ -298,7 +298,7 @@ export default function Chat() {
                 console.log('Archivos del proyecto actualizados con éxito:', data);
                 router.refresh();
             }
-        }, 4000);
+        }, 1000);
     }
 
     useEffect(() => {
@@ -538,12 +538,12 @@ export default function Chat() {
                     console.error('Error al listar los buckets:', error)
                 } else {
                     const bucketExists = data.some(bucket => bucket.id === projects[0]?.name)
-    
+
                     if (!bucketExists) {
                         const { data, error } = await supabaseClient.storage.createBucket(projects[0]?.name, {
                             public: true,
                         })
-    
+
                         if (error) {
                             console.error('Error al crear el bucket:', error)
                         } else {
@@ -551,29 +551,30 @@ export default function Chat() {
                         }
                     }
                 }
-    
+
                 const filePath = `questions/${question.name}`;
                 const { data: uploadData, error: uploadError } = await supabaseClient
                     .storage
                     .from(projects[0]?.name)
                     .upload(filePath, question);
+                    console.log(uploadData)
                 if (uploadError) {
                     console.error('Hubo un error subiendo la pregunta:', uploadError);
                 } else {
+                    console.log(uploadData.path.replace('questions/', ''))
                     const { data, error } = await supabaseClient
                         .storage
                         .from(projects[0]?.name)
                         .createSignedUrl(uploadData.path, 7889400)
-                    console.log(data)
                     const questionUrl = data?.signedUrl || '';
-                    console.log('Pregunta subida con éxito:', uploadData);
-    
+                    console.log('Pregunta subida con éxito:', questionUrl);
+
                     if (question.id === questionsToSave[questionsToSave.length - 1].id) {
                         setIsSaving(false);
-                        await updateProjectQuestions(questionsToSave, questionUrl);
+                        await updateProjectQuestions(questionsToSave, questionUrl,);
                     }
                 }
-    
+
                 const intervalId = setInterval(() => {
                     setProgress(oldProgress => {
                         if (oldProgress >= 100) {
@@ -822,18 +823,24 @@ export default function Chat() {
 
                                             <div className="questions pr-1 flex flex-col items-start justify-start gap-2 max-h-[192px] overflow-auto">
 
-                                            {questions.map((question) => (
-    <div key={question.name} className={`border-2 rounded-md w-full h-auto  flex flex-row px-2 py-1.5 items-center border-[#F29545]`}>
-        <div className="w-full flex flex-row items-center justify-start gap-2">
-            <Image src={fileIcon} alt="file" width={24} height={24} className="file active" />
-            <div className="flex flex-col gap-0 p-0 w-full">
-                <span className="text-sm font-semibold" style={{ color: '#F29545' }}>{question.name}</span>
-                <span className="text-sm font-normal" style={{ color: '#F29545' }}>{(question.size)} MB</span>
-            </div>
-            <Image src={deleteIcon} alt="delete file" width={24} height={24} className="delete active cursor-pointer h-6" onClick={() => handleQuestionDelete(question.id)} />
-        </div>
-    </div>
-))}
+                                                {questions.map((question) => {
+                                                    const sizeInKB = question.size / 1024;
+                                                    const sizeInMB = sizeInKB / 1024;
+                                                    const displaySize = sizeInMB < 1 ? `${sizeInKB.toFixed(2)} KB` : `${sizeInMB.toFixed(2)} MB`;
+
+                                                    return (
+                                                        <div key={question.name} className={`border-2 rounded-md w-full h-auto  flex flex-row px-2 py-1.5 items-center border-[#F29545]`}>
+                                                            <div className="w-full flex flex-row items-center justify-start gap-2">
+                                                                <Image src={fileIcon} alt="file" width={24} height={24} className="file active" />
+                                                                <div className="flex flex-col gap-0 p-0 w-full">
+                                                                    <span className="text-sm font-semibold" style={{ color: '#F29545' }}>{question.name}</span>
+                                                                    <span className="text-sm font-normal" style={{ color: '#F29545' }}>{displaySize}</span>
+                                                                </div>
+                                                                <Image src={deleteIcon} alt="delete file" width={24} height={24} className="delete active cursor-pointer h-6" onClick={() => handleQuestionDelete(question.id)} />
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
 
                                             </div>
                                         </div>
@@ -847,8 +854,8 @@ export default function Chat() {
                                                     <div className="border-[#8A90A7] border-dashed border-2 rounded-md w-full h-auto max-h-[54px] flex flex-row items-center justify-center">
                                                         <div className="w-full h-auto max-h-[54px] flex flex-row items-center justify-center">
                                                             <label htmlFor="dropzone-question" className="flex flex-col items-center justify-center w-full h-[48px] border-[#8A90A7] rounded-md cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
-                                                                <p className="text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Haz click para cargar un <strong>PDF</strong></span></p>
-                                                                <input id="dropzone-question" type="file" className="hidden" onChange={handleQuestionUpload} accept="application/pdf" />
+                                                                <p className="text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Haz click para cargar un <strong>JSON</strong></span></p>
+                                                                <input id="dropzone-question" type="file" className="hidden" onChange={handleQuestionUpload} accept="application/json" />
                                                             </label>
                                                         </div>
                                                     </div>
