@@ -22,8 +22,10 @@ module.exports = {
       },
     });
 
-    // Agregar esta regla para excluir langchain de la minificación
-    config.optimization.minimizer[0].options.terserOptions.exclude = /node_modules\/langchain/;
+    // Verificar si el minimizador existe antes de intentar acceder a sus opciones
+    if (config.optimization && config.optimization.minimizer && config.optimization.minimizer[0]) {
+      config.optimization.minimizer[0].options.terserOptions.exclude = /node_modules\/langchain/;
+    }
 
     return config;
   },
