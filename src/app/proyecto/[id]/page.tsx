@@ -114,26 +114,6 @@ export default function Chat() {
     const handleStartClick = async () => {
         setProjectName(pathname.replace('/proyecto/', ''));
         setIsModalOpen(true);
-        // try {
-        //     setLoadModalVisible(true);
-        //     setIsLoading(true);
-
-        //     const response = await Profundidad(projectName);
-        //     console.log(response);
-
-        //     const preguntaDataArray: PreguntaData[] = Object.keys(response).map(key => ({
-        //         title: key,
-        //         respuestas: response[key]
-        //     }));
-
-        //     setEntrevistaData(preguntaDataArray);
-        //     setTableFinished(true)
-        // } catch (error) {
-        //     console.error(error);
-        // } finally {
-        //     setIsLoading(false);
-        //     setLoadModalVisible(false);
-        // }
     };
 
     const handleModalData = (data: { [key: string]: any[] }) => {
