@@ -12,8 +12,4 @@ module.exports = {
     });
     return config;
   },
-  experimental: {
-    serverActions: true,
-    serverComponentsExternalPackages: ["pdf-parse"],
-  }
 }

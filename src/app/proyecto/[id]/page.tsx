@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import Image from "next/image";
 import React, { useState, useEffect, useRef } from "react";
 import { Avatar, Divider, Tooltip, Select, SelectItem, Progress, Modal, ModalContent, ModalBody, Button, CircularProgress } from "@nextui-org/react";
@@ -7,11 +7,6 @@ import { useRouter, usePathname } from "next/navigation";
 import CheckSession from '@/lib/checkSession'
 import supabaseClient from '@/lib/supabase'
 import '@/styles/chat.css'
-import pdfMake from "pdfmake/build/pdfmake";
-import pdfFonts from "pdfmake/build/vfs_fonts";
-import CHARTS from '@/data/data.json'
-
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 import arrowR from '@/public/icons/arrow-right.svg'
 import link from '@/public/icons/link.svg';
@@ -23,6 +18,10 @@ import deleteIcon from '@/public/icons/delete.svg'
 import trashIcon from '@/public/icons/trash.svg'
 import maximizeIcon from '@/public/icons/maximize.svg'
 
+import Profundidad from "@/components/profundidad";
+
+import ModalInteractive from '@/components/interactiveModal';
+
 
 type Message = {
     sender: string;
@@ -32,22 +31,6 @@ type Message = {
     data: string;
 };
 
-type SourceDataItem = {
-    pageContent: string;
-    metadata: {
-        loc: {
-            lines: {
-                from: number;
-                to: number;
-            };
-        };
-    };
-};
-
-type UrlType = {
-    publicUrl: string
-}
-
 type ChatModuleProps = {
     hover: boolean;
     setHover: React.Dispatch<React.SetStateAction<boolean>>;
@@ -55,12 +38,6 @@ type ChatModuleProps = {
     inputValue: string;
     handleMessageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
-
-interface BotResponse {
-    question: string;
-    users: { [key: string]: string; };
-    answer: string;
-}
 
 interface Project {
     name: string;
@@ -131,38 +108,51 @@ export default function Chat() {
     const [questions, setQuestions] = useState<FileWithId[]>([]);
     const [loadingQuestionIndex, setLoadingQuestionIndex] = useState<number | null>(null);
     const [completedQuestions, setCompletedQuestions] = useState<number[]>([]);
+    const [projectName, setProjectName] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleStartClick = async () => {
-        setLoadModalVisible(true);
-        setIsLoading(true);
+        setProjectName(pathname.replace('/proyecto/', ''));
+        setIsModalOpen(true);
+        // try {
+        //     setLoadModalVisible(true);
+        //     setIsLoading(true);
 
-        // if (projects[0].name === 'Probando') {
-        //     alert('it is')
-        //     return
+        //     const response = await Profundidad(projectName);
+        //     console.log(response);
+
+        //     const preguntaDataArray: PreguntaData[] = Object.keys(response).map(key => ({
+        //         title: key,
+        //         respuestas: response[key]
+        //     }));
+
+        //     setEntrevistaData(preguntaDataArray);
+        //     setTableFinished(true)
+        // } catch (error) {
+        //     console.error(error);
+        // } finally {
+        //     setIsLoading(false);
+        //     setLoadModalVisible(false);
         // }
+    };
 
-        try {
-            const response = await fetch(`/api/table`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ projectName: projects[0].name }),
+    const handleModalData = (data: { [key: string]: any[] }) => {
+        const preguntaDataArray = Object.keys(data).map(key => ({
+            title: key,
+            respuestas: data[key].map(respuesta => {
+                if (typeof respuesta === 'string') {
+                    return { name: respuesta, respuesta: respuesta };
+                } else if (typeof respuesta === 'object' && respuesta !== null) {
+                    return { name: respuesta.name, respuesta: respuesta.respuesta };
+                } else {
+                    console.error(`Respuesta no es una cadena ni un objeto válido: ${respuesta}`);
+                    return { name: '', respuesta: '' };
+                }
             })
-                .then(response => response.json())
-                .then(data => {
-                    // console.log(data);
-                    setEntrevistaData(data);
-                    setTableFinished(true)
-                    setLoadModalVisible(false)
-                    exportToPDF(data);
-                    return data;
-                })
-                .catch(error => console.log(error));
-            console.log(response);
-        } catch (error) {
-            console.error(error);
-        }
+        }));
+
+        setEntrevistaData(preguntaDataArray);
+        setTableFinished(true)
     };
 
     const handleMessageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -228,27 +218,18 @@ export default function Chat() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    useEffect(() => {
-        if (projects[0]?.name === 'Probando') {
-
-            setEntrevistaData(CHARTS);
-            setTableFinished(true)
-        }
-    }, [data, projects]);
-
     const fetchProjects = async () => {
         const projectId = pathname?.split('/')[2];
         const { data, error } = await supabaseClient
             .from('proyectos')
             .select('*')
             .eq('name', projectId);
-    
+
         if (error) {
             console.error('Error al obtener proyectos:', error)
         } else {
             setProjects(data)
             const questions = data[0]?.questions || [];
-            console.log("Preguntas cargadas desde Supabase:", data);
             setQuestions(questions.flat());
         }
     }
@@ -371,7 +352,7 @@ export default function Chat() {
     const handleFileSave = async () => {
         setIsSaving(true);
         const filesToSave = files.filter(file => !completedFiles.includes(file.id));
-        filesToSave.forEach(async (file, index) => {
+        filesToSave.forEach(async (file: any, index) => {
             setTimeout(async () => {
                 setLoadingFileIndex(file.id);
                 setProgress(0);
@@ -433,7 +414,7 @@ export default function Chat() {
                         return oldProgress + 10;
                     });
                 }, 600);
-            }, index * 7000);
+            }, index * 3000);
         });
     };
 
@@ -481,9 +462,6 @@ export default function Chat() {
                 }
             }
         };
-
-        // Crear el PDF
-        pdfMake.createPdf(docDefinition).download(`${pathname}.pdf`);
     };
 
     const handleExportToExcel = () => {
@@ -510,18 +488,39 @@ export default function Chat() {
     };
 
     const handleQuestionDelete = async (questionId: any) => {
-        const questionToDelete = questions.find(question => question.id === Number(questionId));
+        const questionToDelete = questionId;
         if (questionToDelete) {
-            const { data, error } = await supabaseClient
-                .storage
-                .from(projects[0].name)
-                .remove([`questions/${questionToDelete.name}`]);
-            if (data) {
-                const updatedQuestions = questions.filter(question => question.id !== questionToDelete.id);
-                setQuestions(updatedQuestions);
-            } else {
-                console.log('algo fallo')
+            try {
+                const { data, error } = await supabaseClient
+                    .storage
+                    .from(projects[0].name)
+                    .remove([`questions/${questionToDelete}`]);
+                const response = data;
+                if (response !== null) {
+                    const removedQuestion: string = response[0].name.replace('questions/', '');
+                    console.log(removedQuestion);
+
+                    const updatedQuestions = questions.filter(question => question.name !== removedQuestion);
+
+                    const { data, error } = await supabaseClient
+                        .from('proyectos')
+                        .update({ questions: updatedQuestions })
+                        .eq('name', projects[0].name)
+                        .select();
+                    console.log(data);
+                    if (data) {
+                        window.location.reload();
+                    } else {
+                        console.log('algo fallo')
+                    }
+                } else {
+                    console.log('algo fallo')
+                }
+            } catch (error) {
+                console.error('Hubo un error eliminando la pregunta:', error);
             }
+        } else {
+            console.log('no hay archivo')
         }
     };
 
@@ -557,7 +556,7 @@ export default function Chat() {
                     .storage
                     .from(projects[0]?.name)
                     .upload(filePath, question);
-                    console.log(uploadData)
+                console.log(uploadData)
                 if (uploadError) {
                     console.error('Hubo un error subiendo la pregunta:', uploadError);
                 } else {
@@ -639,7 +638,7 @@ export default function Chat() {
 
             <div className="w-full max-w-7xl h-full pt-10 pb-10 flex flex-col items-center justify-start gap-5">
 
-                <ChatModule hover={hover} setHover={setHover} handleSendClick={handleSendClick} inputValue={inputValue} handleMessageChange={handleMessageChange} />
+                {/* <ChatModule hover={hover} setHover={setHover} handleSendClick={handleSendClick} inputValue={inputValue} handleMessageChange={handleMessageChange} /> */}
 
                 {isModalVisible && (
                     <div className="fixed inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-start pt-[94px] gap-4">
@@ -790,19 +789,7 @@ export default function Chat() {
 
                     </Modal>
 
-                    <Modal
-                        isOpen={isLoadModalVisible}
-                        onOpenChange={() => setLoadModalVisible(false)}
-                        className="w-full h-auto max-w-[464px] max-h-[600px] rounded-lg"
-                        isDismissable={false}
-                    >
-                        <ModalContent className="w-full h-auto">
-                            <ModalBody className="w-full h-full flex flex-col items-center justify-center gap-6 p-6">
-                                {isLoading ? <CircularProgress aria-label="modal" /> : null}
-                                <p>{loadMessage}</p>
-                            </ModalBody>
-                        </ModalContent>
-                    </Modal>
+                    <ModalInteractive isOpen={isModalOpen} projectName={projectName} onModalData={handleModalData} />
 
                     <Modal
                         backdrop="opaque"
@@ -836,7 +823,7 @@ export default function Chat() {
                                                                     <span className="text-sm font-semibold" style={{ color: '#F29545' }}>{question.name}</span>
                                                                     <span className="text-sm font-normal" style={{ color: '#F29545' }}>{displaySize}</span>
                                                                 </div>
-                                                                <Image src={deleteIcon} alt="delete file" width={24} height={24} className="delete active cursor-pointer h-6" onClick={() => handleQuestionDelete(question.id)} />
+                                                                <Image src={deleteIcon} alt="delete file" width={24} height={24} className="delete active cursor-pointer h-6" onClick={() => handleQuestionDelete(question.name)} />
                                                             </div>
                                                         </div>
                                                     );
@@ -916,7 +903,7 @@ export default function Chat() {
                                     {preguntaSeleccionada && preguntaSeleccionada?.respuestas?.map((respuesta, index) => (
                                         <div key={index} className="w-full min-h-[36px] flex flex-col items-start justify-start rounded-md bg-[#EFF0F3] cursor-default h-full gap-2 p-2">
                                             <div className="w-full min-w-[256px] h-full max-h-[36px] flex items-center justify-center rounded-md px-3 py-2 bg-white cursor-default">
-                                                <span className=" text-base font-medium text-[#131315]">{respuesta?.name}</span>
+                                                <span className=" text-base font-medium text-[#131315]">{respuesta.name}</span>
                                             </div>
                                             <div className="answer overflow-y-auto w-full h-full max-h-[420px] p-4 bg-white rounded-lg flex items-start">
                                                 <div className="h-full mt-3 px-2">
