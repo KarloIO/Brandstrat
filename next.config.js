@@ -5,7 +5,7 @@ module.exports = {
   },
   webpack: (config) => {
     config.module.rules.push({
-      test: /\.(txt|jpg|gif|svg|eot|ttf|woff|woffmp3|ogg|wav)$/,
+      test: /\.(txt|jpg|gif|svg|eot|ttf|woff|woffmpogg|wav)$/,
       use: {
         loader: 'file-loader',
         options: {
