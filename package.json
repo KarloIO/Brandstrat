@@ -11,7 +11,7 @@
   "dependencies": {
     "@nextui-org/react": "^2.2.4",
     "gpt-tokenizer": "^2.1.2",
-    "next": "14.0.1",
+    "next": "^14.0.2",
     "pdf-parse": "^1.1.1",
     "react": "^18",
     "react-dom": "^18"
