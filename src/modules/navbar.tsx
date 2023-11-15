@@ -1,13 +1,23 @@
 'use client'
 import React, { useEffect, useState } from "react";
 import CheckSession from '@/lib/checkSession';
-import { Navbar, NavbarBrand, NavbarContent, DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, Avatar } from "@nextui-org/react";
+import { Navbar, NavbarBrand, NavbarContent, DropdownItem, DropdownTrigger, Dropdown, Avatar } from "@nextui-org/react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import Image from "next/image";
 
+import { IconBrandAsana, IconUser, IconSettings, IconArrowBarRight } from '@tabler/icons-react'
+
 import logo from '@/public/icons/lineas-solo.png';
-import dashboard from '@/public/icons/layout-dashboard.svg';
 
 
 export default function NavigationBar() {
@@ -23,7 +33,6 @@ export default function NavigationBar() {
             try {
                 const { data: { user }, error } = await supabase.auth.getUser();
                 if (user !== null) {
-                    console.log(user)
                     setUser(user)
                 } else {
                     console.log(error)
@@ -70,7 +79,7 @@ export default function NavigationBar() {
         if (userIsLoggedIn === null) {
             router.push("/auth");
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
@@ -80,41 +89,43 @@ export default function NavigationBar() {
             <Navbar className="" isBlurred={true} maxWidth="full">
 
                 <NavbarBrand>
-                    <Image src={logo} alt="logo" height={32} width={32}/>
+                    <Image src={logo} alt="logo" height={32} width={32} />
                     <p className="font-bold text-inherit">Brandstrat</p>
                 </NavbarBrand>
 
                 <NavbarContent as="div" justify="end">
 
                     {userIsLoggedIn && (
-                        <Dropdown placement="bottom-end">
-                            <DropdownTrigger>
-                                <Avatar
-                                    isBordered
-                                    as="button"
-                                    className="transition-transform"
-                                    color="warning"
-                                    name="Jason Hughes"
-                                    size="sm"
-                                    src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
-                                />
-                            </DropdownTrigger>
-                            <DropdownMenu aria-label="Profile Actions" variant="flat">
-                                <DropdownItem key="profile" className="h-14 gap-2" style={{ cursor: 'default' }}>
-                                    <p className="font-semibold">Bienvenido</p>
-                                    <p className="font-semibold">{user?.email}</p>
-                                </DropdownItem>
-                                <DropdownItem key="dashboard" className="">
-                                    <div className="w-full h-full flex flex-row gap-1">
-                                        <Image src={dashboard} className="" alt="icon" width={20} height={20}/>
-                                        <p className="font-normal">Dashboard</p>
-                                    </div>
-                                </DropdownItem>
-                                <DropdownItem key="logout" color="danger" onClick={() => handleSignOut()}>
-                                    Cerrar Sesion
-                                </DropdownItem>
-                            </DropdownMenu>
-                        </Dropdown>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Avatar src={undefined} alt="user" className="bg-[#E7E7E8] text-[#1F1F21] cursor-pointer" aria-label="user" name={user.email} />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-56 mr-2">
+                                <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+
+                                <DropdownMenuItem onClick={() => router.push('/dashmin')}>
+                                    <IconBrandAsana className='w-[16px]' />
+                                    Panel de Control
+                                </DropdownMenuItem>
+
+                                <DropdownMenuGroup>
+                                    <DropdownMenuItem onClick={() => router.push('/profile/asd')}>
+                                        <IconUser className='w-[16px]' />
+                                        Perfil
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem>
+                                        <IconSettings className='w-[16px]' />
+                                        Ajustes
+                                    </DropdownMenuItem>
+                                </DropdownMenuGroup>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem>
+                                    <IconArrowBarRight className='w-[16px]' />
+                                    <button>Cerrar Sesion</button>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     )}
 
                 </NavbarContent>
