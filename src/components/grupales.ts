@@ -10,25 +10,11 @@ import { BufferWindowMemory } from "langchain/memory";
 import pdfParse from 'pdf-parse';
 import { encode } from 'gpt-tokenizer';
 
-export default async function Profundidad(projectName: string) {
+export default async function Grupales(projectName: string, fileName: string) {
 
     const project = (projectName).toString();
     let respuestas: { [key: string]: { name: string, respuesta: string }[] } = {};
     let totalTokens = 0;
-
-    let archivosProcesados: { [nombreArchivo: string]: boolean } = {};
-
-    const { data } = await supabaseClient
-        .storage
-        .from(project)
-        .list('', {
-            limit: undefined,
-            offset: undefined
-        });
-
-    const filteredData = data?.filter(archivo => archivo.name !== 'questions');
-
-    console.log(filteredData)
 
     async function procesarArchivo(nombreArchivo: string) {
         try {
@@ -121,27 +107,21 @@ export default async function Profundidad(projectName: string) {
 
                 const preguntasAplanadas = preguntas.flat();
 
-                console.log(`------ Obteniendo el nombre del entrevistado ------`);
-                const nombreQuery = `¿Cuál es el nombre del entrevistado? Solo dame el primer nombre sin texto extra. Responde siempre en español.`;
-                const nombreRespuesta = await chain.call({ query: nombreQuery })
-                console.log('Nombre obtenido:', nombreRespuesta);
-                const eName = nombreRespuesta.text;
-
                 for (const pregunta of preguntasAplanadas) {
                     console.log(`------ Procesando pregunta: ${pregunta} ------`);
-                    const preguntaPersonalizada = `${pregunta}. If you don't have an immediate answer, please re-analyze the documents and provide an answer based on similar bases to the question. The answers should be in the first person, as if the interviewee were answering the interview question. Always respond in Spanish.`;
-                    const response = await chain.call({ query: preguntaPersonalizada })
+                    const preguntaGeneral = `${pregunta}. Please provide a summary based on the document content. Always respond in Spanish.`;
+                    const response = await chain.call({ query: preguntaGeneral })
                 
                     if (!respuestas[pregunta]) {
                         respuestas[pregunta] = [];
                     }
                 
-                    respuestas[pregunta].push({ name: eName, respuesta: response.text });
+                    respuestas[pregunta].push({ name: nombreArchivo, respuesta: response.text });
                 
                     const tokens = encode(response.text);
                     totalTokens += tokens.length;
                 }
-
+    
                 console.log(`------ Terminado con el archivo: ${nombreArchivo}. Comenzando con el siguiente archivo ------`);
 
                 // await vectorStore.delete()
@@ -159,17 +139,7 @@ export default async function Profundidad(projectName: string) {
         }
     }
 
-    if (filteredData && filteredData.length > 0) {
-        const nombresArchivos = filteredData.map(archivo => archivo.name);
-        const nombresArchivosSinProcesar = nombresArchivos.filter(nombreArchivo => !archivosProcesados[nombreArchivo]);
-
-        for (const nombreArchivo of nombresArchivosSinProcesar) {
-            const nombreArchivoProcesado = await procesarArchivo(nombreArchivo);
-            if (nombreArchivoProcesado) {
-                archivosProcesados[nombreArchivoProcesado] = true;
-            }
-        }
-    }
+    await procesarArchivo(fileName);
 
     console.log(`Total de tokens utilizados: ${totalTokens}`);
 

@@ -1,15 +1,12 @@
 'use client';
 import React, { useEffect, useState } from 'react'
 import NavigationBar from '@/modules/navbar'
-import Image from 'next/image'
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure, Input } from "@nextui-org/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure, Input, Divider, AvatarGroup, Avatar, Progress } from "@nextui-org/react";
 import CheckSession from '@/lib/checkSession'
 import { useRouter } from 'next/navigation';
 import supabaseClient from '@/lib/supabase'
 
-
-import folder from '@/public/icons/folder.svg'
-import arrowR from '@/public/icons/arrow-right.svg'
+import { IconLayoutGridAdd, IconProgressBolt, IconPlayerPause, IconDiscountCheck, IconDotsVertical, IconUser, IconFileTypePdf, IconUsersGroup, IconColumns } from '@tabler/icons-react'
 
 interface Project {
   name: string;
@@ -44,7 +41,7 @@ export default function Home() {
     const { data, error } = await supabaseClient
       .from('proyectos')
       .select('*')
-      console.log(data)
+    console.log(data)
 
     if (error) {
       console.error('Error al obtener proyectos:', error)
@@ -59,7 +56,7 @@ export default function Home() {
       .insert([
         { name: projectName, description: projectDescription },
       ])
-  
+
     if (error) {
       console.error('Error al insertar datos:', error)
     } else {
@@ -115,49 +112,219 @@ export default function Home() {
         </ModalContent>
       </Modal>
 
-      <div className='w-full max-w-7xl h-full pt-10 flex flex-col gap-5'>
+      <div className='w-full max-w-7xl h-full pt-6 flex flex-col gap-8'>
 
-        <div className='w-full h-auto flex flex-row justify-between items-end px-2'>
+        <div className='w-full h-14 flex flex-row items-end justify-between cursor-default'>
 
-          <div className='w-auto h-auto flex flex-col items-start justify-start gap-0'>
+          <div className='w-auto h-full flex flex-col gap-0'>
 
-            <h2 className='font-bold text-2xl text-[#131315]' style={{ cursor: 'default' }} >Dashboard</h2>
+            <span className=' text-base font-normal text-[#A1A1A1]'>Bienvenido de vuelta Karlo Aldrete</span>
 
-            <span className='font-normal text-base text-[#131315]' style={{ cursor: 'default' }} >Administra tus proyectos</span>
+            <h4 className=' text-2xl font-bold text-[#1F1F21]'>Administrador de proyectos</h4>
 
           </div>
 
-          <button onClick={onOpen} className='h-fit w-auto border-x-1 border-t-1 border-b-2 border-[#131315] rounded-lg px-3 py-1.5 gap-1 text-sm font-semibold text-[#131315] hover:bg-[#EF7A17] hover:text-white hover:border-[#D76A0F] ease-in-out duration-200'>
-            Agregar Proyecto
-          </button>
+          <Button className='w-auto h-8 px-3 bg-white text-base font-bold text-[#1F1F21] rounded-md border-2 border-[#1F1F21] hover:bg-[#1F1F21] hover:text-[#E7E7E8]'>Añadir proyecto</Button>
 
         </div>
 
-        <div className='w-full h-auto flex flex-row flex-wrap justify-start gap-3'>
+        <div className='w-full h-full grid grid-cols-4 gap-5'>
 
-          {projects?.map((project) => (
-            <div className='w-full max-w-[305px] h-auto bg-white border-x-1 border-t-1 border-b-2 border-[#E0E0E0] flex flex-col p-5 gap-3 rounded-lg' key={project.name}>
+          <div className='flex flex-col items-start justify-start gap-2'>
 
-              <div className='flex flex-row gap-1'>
+            <div className='w-full max-h-9 h-full flex flex-row items-center justify-start gap-2 cursor-default p-2'>
 
-                <Image src={folder} alt='folder' width={20} height={20} />
+              <IconLayoutGridAdd size={20} className='text-[#1F1F21]' />
 
-                <h4 className='font-bold text-black text-base'>{project.name}</h4>
+              <span className=' text-base font-bold text-[#1F1F21]'>Nuevos</span>
+
+            </div>
+
+            <div className='w-full h-full flex flex-col items-start justify-start gap-2 overflow-y-auto' style={{ maxHeight: 'calc(100vh - 256px)' }}>
+
+              <div className='w-full border-x-1 border-t-1 border-b-2 border-[#89898A] flex flex-col items-start justify-start p-4 gap-4 rounded-lg bg-white'>
+
+                <div className='w-full flex flex-col items-center justify-start gap-2 cursor-default'>
+
+                  <div className='w-full h-[18px] flex flex-row items-center justify-between'>
+
+                    <div className='w-auto h-full flex flex-row gap-1 cursor-default'>
+
+                      <IconUser size={18} className='text-[#89898A] stroke-[3]' />
+
+                      <span className=' text-sm font-semibold text-[#89898A]'>Profundidad</span>
+
+                    </div>
+
+                    <IconDotsVertical size={18} className='text-[#89898A] cursor-pointer hover:text-[#1F1F21]' />
+
+                  </div>
+
+                  <div className='w-full h-auto'>
+
+                    <span className='descriptions'>Empresa de productos defectuosos encabezada por Jennifer Lozoya.</span>
+
+                  </div>
+
+                </div>
+
+                <Divider className='h-[1px] bg-[#89898A]'></Divider>
+
+                <div className='w-full h-8 flex flex-row items-end justify-between'>
+
+                  <div className='w-auto h-full'>
+
+                    <AvatarGroup isBordered color={undefined}>
+
+                      <Avatar src='https://i.pravatar.cc/150?u=a042581f4e29026024d' size='sm' />
+                      <Avatar src='https://i.pravatar.cc/150?u=a042581f4e29026024d' size='sm' />
+
+                    </AvatarGroup>
+
+                  </div>
+
+                  <div className='w-auto h-auto'>
+
+                    <div className='w-auto h-auto flex flex-row gap-1 items-center justify-end'>
+
+                      <IconFileTypePdf size={24} className='text-[#1F1F21]' />
+
+                      <span className='text-sm font-bold text-[#1F1F21]'>0 Docs</span>
+
+                    </div>
+
+                  </div>
+
+                </div>
 
               </div>
 
-              <span className='font-normal text-black text-sm'>{project.description}</span>
+            </div>
 
-              <a href={`/proyecto/${project.name}`} className='w-fit h-auto flex gap-1 hover:gap-2 ease-in-out duration-200'>
+          </div>
 
-                <span className='w-fit font-semibold text-[#EF7A17] text-sm'>Interactuar</span>
+          <div className='flex flex-col items-start justify-start gap-2'>
 
-                <Image src={arrowR} alt='arrow' width={16} height={16} />
+            <div className='w-full min-h-9 max-h-9 flex flex-row items-center justify-start gap-2 cursor-default p-2'>
 
-              </a>
+              <IconProgressBolt size={20} className='text-[#1F1F21]' />
+
+              <span className=' text-base font-bold text-[#1F1F21]'>En Proceso</span>
 
             </div>
-          ))}
+
+            <div className='w-full h-full overflow-y-auto gap-2 flex flex-col' style={{ maxHeight: 'calc(100vh - 256px)'}}>
+
+              <div className='w-full border-x-1 border-t-1 border-b-2 border-[#89898A] flex flex-col items-start justify-start p-4 gap-4 rounded-lg bg-white'>
+
+                <div className='w-full flex flex-col items-center justify-start gap-2 cursor-default'>
+
+                  <div className='w-full h-[18px] flex flex-row items-center justify-between'>
+
+                    <div className='w-auto h-full flex flex-row gap-1 cursor-default'>
+
+                      <IconUsersGroup size={18} className='text-[#89898A] stroke-[3]' />
+
+                      <span className=' text-sm font-semibold text-[#89898A]'>Grupal</span>
+
+                    </div>
+
+                    <IconDotsVertical size={18} className='text-[#89898A] cursor-pointer hover:text-[#1F1F21]' />
+
+                  </div>
+
+                  <div className='w-full h-auto'>
+
+                    <span className='descriptions'>Empresa de productos defectuosos encabezada por Jennifer Lozoya.</span>
+
+                  </div>
+
+                </div>
+
+                <div className='w-full'>
+
+                  <Progress aria-label='progress' label='6 / 12 Entrevistados' value={50} color='primary' className='progress' />
+
+                </div>
+
+                <Divider className='h-[1px] bg-[#89898A]'></Divider>
+
+                <div className='w-full h-8 flex flex-row items-end justify-between'>
+
+                  <div className='w-auto h-full'>
+
+                    <AvatarGroup isBordered color={undefined}>
+
+                      <Avatar src='https://i.pravatar.cc/150?u=a042581f4e29026024d' size='sm' />
+                      <Avatar src='https://i.pravatar.cc/150?u=a042581f4e29026024d' size='sm' />
+
+                    </AvatarGroup>
+
+                  </div>
+
+                  <div className='w-auto h-auto flex flex-row items-center justify-end gap-4'>
+
+                    <div className='w-auto h-auto flex flex-row gap-1 items-center justify-end'>
+
+                      <IconFileTypePdf size={24} className='text-[#1F1F21]' />
+
+                      <span className='text-sm font-bold text-[#1F1F21]'>8 Docs</span>
+
+                    </div>
+
+                    <div className='w-auto h-auto flex flex-row gap-1 items-center justify-end'>
+
+                      <IconColumns size={24} className='text-[#1F1F21]' />
+
+                      <span className='text-sm font-bold text-[#1F1F21]'>Tabla</span>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div className='flex flex-col items-start justify-start gap-2'>
+
+            <div className='w-full min-h-9 max-h-9 flex flex-row items-center justify-start gap-2 cursor-default p-2'>
+
+              <IconPlayerPause size={20} className='text-[#1F1F21]' />
+
+              <span className=' text-base font-bold text-[#1F1F21]'>Pausados</span>
+
+            </div>
+
+            <div className='w-full h-full'>
+
+              <div className='w-full h-auto border-x-1 border-t-1 border-b-2 border-[#89898A] flex flex-col items-start justify-start p-4 gap-4 rounded-lg bg-white'></div>
+
+            </div>
+
+          </div>
+
+          <div className='flex flex-col items-start justify-start gap-2'>
+
+            <div className='w-full min-h-9 max-h-9 flex flex-row items-center justify-start gap-2 cursor-default p-2'>
+
+              <IconDiscountCheck size={20} className='text-[#1F1F21]' />
+
+              <span className=' text-base font-bold text-[#1F1F21]'>Finalizados</span>
+
+            </div>
+
+            <div className='w-full h-full'>
+
+              <div className='w-full h-auto border-x-1 border-t-1 border-b-2 border-[#89898A] flex flex-col items-start justify-start p-4 gap-4 rounded-lg bg-white'></div>
+
+            </div>
+
+          </div>
 
         </div>
 

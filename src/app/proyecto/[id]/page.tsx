@@ -8,15 +8,7 @@ import CheckSession from '@/lib/checkSession'
 import supabaseClient from '@/lib/supabase'
 import '@/styles/chat.css'
 
-import arrowR from '@/public/icons/arrow-right.svg'
-import link from '@/public/icons/link.svg';
-import wand from '@/public/icons/wand.svg';
-import wWand from '@/public/icons/white-wand.svg';
-import forward from '@/public/icons/forward.svg';
-import fileIcon from '@/public/icons/file.svg';
-import deleteIcon from '@/public/icons/delete.svg'
-import trashIcon from '@/public/icons/trash.svg'
-import maximizeIcon from '@/public/icons/maximize.svg'
+import { IconMenu2, IconWand, IconArrowForward, IconArrowNarrowLeft, IconLink, IconFileFilled, IconBackspaceFilled, IconMaximize } from '@tabler/icons-react';
 
 import Profundidad from "@/components/profundidad";
 
@@ -58,11 +50,11 @@ const ChatModule: React.FC<ChatModuleProps> = ({ hover, setHover, handleSendClic
     return (
         <div className="w-[640px] h-auto rounded-lg bg-white p-3 flex justify-between border-x-1 border-t-1 border-b-2 border-[#E0E0E0]">
             <div className="w-4/5 h-full max-h-5 flex flex-row gap-2">
-                <Image src={wand} alt="wand" width={20} height={20} />
+                <IconWand size={20} />
                 <input type="text" value={inputValue} placeholder="Haz una consulta..." onChange={handleMessageChange} className="bg-white w-full border-white focus:outline-none text-md font-medium text-[#8A90A7] placeholder:text-[#8A90A7]" />
             </div>
             <div className="w-auto h-full max-h-5 flex flex-row gap-1 items-center cursor-pointer ease-in-out duration-200" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onClick={() => handleSendClick(inputValue)}>
-                <Image src={forward} alt="wand" width={20} height={20} className={hover ? "fill-current text-[#F29545] filter brightness-0 saturate-100% hue-rotate(360deg) invert(46%) sepia(86%) saturate(1146%) hue-rotate(356deg) brightness(101%) contrast(87%) duration-200" : "duration-200 fill-current"} />
+                <IconArrowForward size={20} className={hover ? "fill-current text-[#F29545] filter brightness-0 saturate-100% hue-rotate(360deg) invert(46%) sepia(86%) saturate(1146%) hue-rotate(356deg) brightness(101%) contrast(87%) duration-200" : "duration-200 fill-current"} />
                 <span className={hover ? "font-semibold text-sm text-black duration-200" : "font-semibold text-sm text-[#8A90A7] duration-200"}>Enviar</span>
             </div>
         </div>
@@ -580,7 +572,7 @@ export default function Chat() {
 
                 <div className="w-auto h-auto max-h-8 flex flex-row px-3 py-2 gap-1 items-center justify-start border-2 border-[#EFF0F3] rounded-lg hover:border-[#F29545] cursor-pointer" onClick={() => router.push('/')}>
 
-                    <Image src={arrowR} alt='arrow' width={16} height={16} className="rotate-180" />
+                    <IconArrowNarrowLeft size={20} />
 
                     <span className='w-fit font-semibold text-[#F29545] text-sm'>Regresar</span>
 
@@ -592,7 +584,7 @@ export default function Chat() {
 
                         <div className="w-auto h-auto max-h-8 flex flex-row px-2 py-2 gap-1 items-center justify-start border-2 border-[#EFF0F3] bg-white rounded-lg hover:border-[#F29545] cursor-pointer" onClick={handleCopyLink}>
 
-                            <Image src={link} alt='arrow' width={16} height={16} className="rotate-180" />
+                            <IconLink size={20} />
 
                         </div>
 
@@ -609,7 +601,7 @@ export default function Chat() {
                     <Divider orientation="vertical" className="divider h-[24px] w-[2px] rounded" />
 
                     <div className="trashcontainer border-2 border-[#FF6363] rounded-lg w-auto h-auto max-w-[34px] max-h-[34px] flex p-1 cursor-pointer hover:bg-[#FF6363]">
-                        <Image src={trashIcon} alt="" width={24} height={24} className="trash" />
+                        <IconMenu2 size={24} className="trash" />
                     </div>
 
                 </div>
@@ -635,7 +627,7 @@ export default function Chat() {
                                             {message.sender === 'user' ? (
                                                 <Avatar className="min-w-[36px] min-h-[36px] max-w-[36px] max-h-[36px]" src="https://i.pravatar.cc/150?u=a042581f4e29026024d" />
                                             ) : (
-                                                <Avatar radius="sm" className="min-w-[36px] min-h-[36px] max-w-[36px] max-h-[36px] p-2 bg-black" src={wWand} />
+                                                <IconWand size={36} />
                                             )}
 
                                             <span className='w-full flex flex-row items-center justify-start break-words overflow-wrap break-word font-semibold'>{message.content}</span>
@@ -709,12 +701,12 @@ export default function Chat() {
                                                 {projects?.[0]?.files?.flat().map((file) => (
                                                     <div key={file.name} className={`border-2 rounded-md w-full h-auto  flex flex-row px-2 py-1.5 items-center border-[#F29545]`}>
                                                         <div className="w-full flex flex-row items-center justify-start gap-2">
-                                                            <Image src={fileIcon} alt="file" width={24} height={24} className="file active" />
+                                                            <IconFileFilled size={24} className="file active" />
                                                             <div className="flex flex-col gap-0 p-0 w-full">
                                                                 <span className="text-sm font-semibold" style={{ color: '#F29545' }}>{file.name}</span>
                                                                 <span className="text-sm font-normal" style={{ color: '#F29545' }}>{(file.size)} MB</span>
                                                             </div>
-                                                            <Image src={deleteIcon} alt="delete file" width={24} height={24} className="delete active cursor-pointer h-6" onClick={() => handleFileDelete(file.name)} />
+                                                            <IconBackspaceFilled size={24} className="delete active cursor-pointer h-6" onClick={() => handleFileDelete(file.name)} />
                                                         </div>
                                                     </div>
                                                 ))}
@@ -730,13 +722,13 @@ export default function Chat() {
                                                 {files.filter((file) => !completedFiles.includes(file.id)).map((file) => (
                                                     <div key={file.id} className={`border-2 rounded-md w-full h-auto max-h-[60px] flex flex-row px-2 py-1.5 items-center border-[#8A90A7]`}>
                                                         <div className="w-full flex flex-row items-center justify-start gap-2">
-                                                            {loadingFileIndex === file.id ? <CircularProgress aria-label="progress" className="file" size="sm" color="default" /> : <Image src={fileIcon} alt="file" width={24} height={24} className="file" />}
+                                                            {loadingFileIndex === file.id ? <CircularProgress aria-label="progress" className="file" size="sm" color="default" /> : <IconFileFilled size={24} className="file" />}
                                                             <div className="flex flex-col gap-0 p-0 w-full h-auto">
                                                                 <span className="text-sm font-semibold" style={{ color: '#8A90A7' }}>{file.name}</span>
                                                                 <span className="text-sm font-normal" style={{ color: '#8A90A7' }}>{(file.size / (1024 * 1024)).toFixed(2)} MB</span>
                                                                 {loadingFileIndex === file.id && <Progress aria-label="progress" value={progress} className=" max-h-1 bg-[#8A90A7] rounded" />}
                                                             </div>
-                                                            {isSaving ? null : <Image src={deleteIcon} alt="delete file" width={24} height={24} className="delete cursor-pointer h-6 " onClick={() => handleFileDelete(file.name)} />}
+                                                            {isSaving ? null : <IconBackspaceFilled size={24} className="delete cursor-pointer h-6 " onClick={() => handleFileDelete(file.name)} />}
                                                         </div>
                                                     </div>
                                                 ))}
@@ -769,7 +761,7 @@ export default function Chat() {
 
                     </Modal>
 
-                    <ModalInteractive isOpen={isModalOpen} projectName={projectName} onModalData={handleModalData} />
+                    <ModalInteractive isOpen={isModalOpen} projectName={projectName} onModalData={handleModalData} tipoAnalisis="profundidad" />
 
                     <Modal
                         backdrop="opaque"
@@ -798,12 +790,12 @@ export default function Chat() {
                                                     return (
                                                         <div key={question.name} className={`border-2 rounded-md w-full h-auto  flex flex-row px-2 py-1.5 items-center border-[#F29545]`}>
                                                             <div className="w-full flex flex-row items-center justify-start gap-2">
-                                                                <Image src={fileIcon} alt="file" width={24} height={24} className="file active" />
+                                                                <IconFileFilled size={24} className="file active" />
                                                                 <div className="flex flex-col gap-0 p-0 w-full">
                                                                     <span className="text-sm font-semibold" style={{ color: '#F29545' }}>{question.name}</span>
                                                                     <span className="text-sm font-normal" style={{ color: '#F29545' }}>{displaySize}</span>
                                                                 </div>
-                                                                <Image src={deleteIcon} alt="delete file" width={24} height={24} className="delete active cursor-pointer h-6" onClick={() => handleQuestionDelete(question.name)} />
+                                                                <IconBackspaceFilled size={24} className="delete active cursor-pointer h-6" onClick={() => handleQuestionDelete(question.name)} />
                                                             </div>
                                                         </div>
                                                     );
@@ -845,7 +837,7 @@ export default function Chat() {
 
                             <span className=" text-base font-bold text-[#131315]">Tabla generada automáticamente</span>
 
-                            <Image src={maximizeIcon} width={20} height={20} alt="maximize" className="cursor-pointer" />
+                            <IconMaximize size={20} className="cursor-pointer" />
 
                         </div>
 
