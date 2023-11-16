@@ -34,6 +34,7 @@ export default function NavigationBar() {
                 const { data: { user }, error } = await supabase.auth.getUser();
                 if (user !== null) {
                     setUser(user)
+                    console.log(user);
                 } else {
                     console.log(error)
                     setUser('')
@@ -104,13 +105,13 @@ export default function NavigationBar() {
                                 <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
 
-                                <DropdownMenuItem onClick={() => router.push('/dashmin')}>
+                                <DropdownMenuItem onClick={() => router.push('/dashboard')}>
                                     <IconBrandAsana className='w-[16px]' />
                                     Panel de Control
                                 </DropdownMenuItem>
 
                                 <DropdownMenuGroup>
-                                    <DropdownMenuItem onClick={() => router.push('/profile/asd')}>
+                                    <DropdownMenuItem onClick={() => router.push(`/profile/${user.email}`)}>
                                         <IconUser className='w-[16px]' />
                                         Perfil
                                     </DropdownMenuItem>

@@ -31,3 +31,8 @@
 .progress div:nth-child(2) div {
   background-color: #D0D0D0;
 }
+
+.auth {
+  background-size: 40px 40px;
+  background-image: radial-gradient(circle, #D0D0D0 1px, rgba(0, 0, 0, 0) 1px);
+}

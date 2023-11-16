@@ -13,6 +13,8 @@ interface Project {
   description: string;
 }
 
+import { Meteors } from '@/components/Meteors';
+
 export default function Home() {
   const router = useRouter();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -174,8 +176,12 @@ export default function Home() {
 
                   <div className='w-auto h-full'>
 
-                    <AvatarGroup isBordered color={undefined}>
+                    <AvatarGroup isBordered max={3} renderCount={(count) => (
+                      <p className="text-small font-medium ms-2 text-[#89898A]">+{count}</p>
+                    )}>
 
+                      <Avatar src='' size='sm' name='test' />
+                      <Avatar src='https://i.pravatar.cc/150?u=a042581f4e29026024d' size='sm' />
                       <Avatar src='https://i.pravatar.cc/150?u=a042581f4e29026024d' size='sm' />
                       <Avatar src='https://i.pravatar.cc/150?u=a042581f4e29026024d' size='sm' />
 
@@ -213,7 +219,7 @@ export default function Home() {
 
             </div>
 
-            <div className='w-full h-full overflow-y-auto gap-2 flex flex-col' style={{ maxHeight: 'calc(100vh - 256px)'}}>
+            <div className='w-full h-full overflow-y-auto gap-2 flex flex-col' style={{ maxHeight: 'calc(100vh - 256px)' }}>
 
               <div className='w-full border-x-1 border-t-1 border-b-2 border-[#89898A] flex flex-col items-start justify-start p-4 gap-4 rounded-lg bg-white'>
 
