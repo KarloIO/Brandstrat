@@ -13,8 +13,6 @@ interface Project {
   description: string;
 }
 
-import { Meteors } from '@/components/Meteors';
-
 export default function Home() {
   const router = useRouter();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();

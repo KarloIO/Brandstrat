@@ -1,5 +1,4 @@
 'use client';
-import Image from "next/image";
 import React, { useState, useEffect, useRef } from "react";
 import { Avatar, Divider, Tooltip, Select, SelectItem, Progress, Modal, ModalContent, ModalBody, Button, CircularProgress } from "@nextui-org/react";
 // import { sendMessageToBot } from "@/pages/api/bot";
@@ -9,8 +8,6 @@ import supabaseClient from '@/lib/supabase'
 import '@/styles/chat.css'
 
 import { IconMenu2, IconWand, IconArrowForward, IconArrowNarrowLeft, IconLink, IconFileFilled, IconBackspaceFilled, IconMaximize } from '@tabler/icons-react';
-
-import Profundidad from "@/components/profundidad";
 
 import ModalInteractive from '@/components/interactiveModal';
 
@@ -44,22 +41,21 @@ interface FileWithId extends File {
     name: string;
     title: string;
 }
+// const ChatModule: React.FC<ChatModuleProps> = ({ hover, setHover, handleSendClick, inputValue, handleMessageChange }) => {
 
-const ChatModule: React.FC<ChatModuleProps> = ({ hover, setHover, handleSendClick, inputValue, handleMessageChange }) => {
-
-    return (
-        <div className="w-[640px] h-auto rounded-lg bg-white p-3 flex justify-between border-x-1 border-t-1 border-b-2 border-[#E0E0E0]">
-            <div className="w-4/5 h-full max-h-5 flex flex-row gap-2">
-                <IconWand size={20} />
-                <input type="text" value={inputValue} placeholder="Haz una consulta..." onChange={handleMessageChange} className="bg-white w-full border-white focus:outline-none text-md font-medium text-[#8A90A7] placeholder:text-[#8A90A7]" />
-            </div>
-            <div className="w-auto h-full max-h-5 flex flex-row gap-1 items-center cursor-pointer ease-in-out duration-200" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onClick={() => handleSendClick(inputValue)}>
-                <IconArrowForward size={20} className={hover ? "fill-current text-[#F29545] filter brightness-0 saturate-100% hue-rotate(360deg) invert(46%) sepia(86%) saturate(1146%) hue-rotate(356deg) brightness(101%) contrast(87%) duration-200" : "duration-200 fill-current"} />
-                <span className={hover ? "font-semibold text-sm text-black duration-200" : "font-semibold text-sm text-[#8A90A7] duration-200"}>Enviar</span>
-            </div>
-        </div>
-    );
-};
+//     return (
+//         <div className="w-[640px] h-auto rounded-lg bg-white p-3 flex justify-between border-x-1 border-t-1 border-b-2 border-[#E0E0E0]">
+//             <div className="w-4/5 h-full max-h-5 flex flex-row gap-2">
+//                 <IconWand size={20} />
+//                 <input type="text" value={inputValue} placeholder="Haz una consulta..." onChange={handleMessageChange} className="bg-white w-full border-white focus:outline-none text-md font-medium text-[#8A90A7] placeholder:text-[#8A90A7]" />
+//             </div>
+//             <div className="w-auto h-full max-h-5 flex flex-row gap-1 items-center cursor-pointer ease-in-out duration-200" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onClick={() => handleSendClick(inputValue)}>
+//                 <IconArrowForward size={20} className={hover ? "fill-current text-[#F29545] filter brightness-0 saturate-100% hue-rotate(360deg) invert(46%) sepia(86%) saturate(1146%) hue-rotate(356deg) brightness(101%) contrast(87%) duration-200" : "duration-200 fill-current"} />
+//                 <span className={hover ? "font-semibold text-sm text-black duration-200" : "font-semibold text-sm text-[#8A90A7] duration-200"}>Enviar</span>
+//             </div>
+//         </div>
+//     );
+// };
 
 type Respuesta = {
     name: string;
@@ -614,7 +610,7 @@ export default function Chat() {
 
                 {isModalVisible && (
                     <div className="fixed inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-start pt-[94px] gap-4">
-                        <ChatModule hover={hover} setHover={setHover} handleSendClick={handleSendClick} inputValue={inputValue} handleMessageChange={handleMessageChange} />
+                        {/* <ChatModule hover={hover} setHover={setHover} handleSendClick={handleSendClick} inputValue={inputValue} handleMessageChange={handleMessageChange} /> */}
 
                         <div className="messages max-h-6/12 flex flex-col items-center justify-start gap-4 overflow-auto scroll" ref={messagesContainerRef}>
                             {messages.map((message, index) => (

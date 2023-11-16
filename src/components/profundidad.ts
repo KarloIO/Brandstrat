@@ -9,12 +9,15 @@ import { Document } from 'langchain/document';
 import { BufferWindowMemory } from "langchain/memory";
 import pdfParse from 'pdf-parse';
 import { encode } from 'gpt-tokenizer';
+import { PromptTemplate } from 'langchain/prompts'
 
 export default async function Profundidad(projectName: string, fileName: string) {
 
     const project = (projectName).toString();
     let respuestas: { [key: string]: { name: string, respuesta: string }[] } = {};
     let totalTokens = 0;
+
+    console.log(PromptTemplate)
 
     async function procesarArchivo(nombreArchivo: string) {
         try {

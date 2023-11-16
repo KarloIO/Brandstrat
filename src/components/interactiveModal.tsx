@@ -1,3 +1,4 @@
+'use client';
 import { useState, useEffect } from 'react';
 import { Modal, Progress, ModalContent, ModalBody, ModalHeader, Button } from '@nextui-org/react';
 
