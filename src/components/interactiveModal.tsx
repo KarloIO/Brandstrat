@@ -21,8 +21,6 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
 
     const absolutePath = path.resolve(relativePath);
 
-    console.log(absolutePath);
-    
     const [visible, setVisible] = useState(isOpen);
     const [progress, setProgress] = useState(0);
     const [archivoActual, setArchivoActual] = useState("");
@@ -50,61 +48,71 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
             // setModalText(`Analizando ${archivoActual}`);
 
             const fetchProjectNames = async () => {
-                const { data, error } = await supabaseClient
-                    .storage
-                    .from(projectName)
-                    .list()
+                try {
+                    const { data, error } = await supabaseClient
+                        .storage
+                        .from(projectName)
+                        .list()
 
-                if (error || !data || data.length === 0) {
-                    console.error('Error al obtener nombres de proyectos:', error);
-                    setModalText('No hay archivos en el proyecto');
-                    setShowButton(true);
-                    setHasError(true);
-                    onModalData('No hay archivos en el proyecto')
-                } else {
-                    console.log(data);
-                    const filteredData = data?.filter(archivo => archivo.name !== 'questions');
-                    const totalFiles = filteredData?.length || 0;
-
-                    if (totalFiles === 0) {
-                        setModalText('No hay preguntas para leer');
+                    if (error || !data || data.length === 0) {
+                        console.error('Error al obtener nombres de proyectos:', error);
+                        setModalText('No hay archivos en el proyecto');
                         setShowButton(true);
                         setHasError(true);
-                        onModalData('No hay preguntas en el proyecto')
-                    } else if (filteredData) {
-                        for (let index = 0; index < filteredData.length; index++) {
-                            const archivo = filteredData[index];
-                            // setArchivoActual(`Analizando ${archivo.name}`);
-                            // setModalText(`Analizando ${archivo.name}`);
+                        onModalData('No hay archivos en el proyecto')
+                    } else {
+                        console.log(data);
+                        const filteredData = data?.filter(archivo => archivo.name !== 'questions');
+                        const totalFiles = filteredData?.length || 0;
 
-                            const funcionAnalisis = tipoAnalisis === 'grupales' ? Grupales : (tipoAnalisis === 'profundidad' ? Profundidad : undefined);
+                        if (totalFiles === 0) {
+                            setModalText('No hay preguntas para leer');
+                            setShowButton(true);
+                            setHasError(true);
+                            onModalData('No hay preguntas en el proyecto')
+                        } else if (filteredData) {
+                            for (let index = 0; index < filteredData.length; index++) {
+                                const archivo = filteredData[index];
+                                setArchivoActual(`Analizando ${archivo.name}`);
+                                setModalText(`Analizando ${archivo.name}`);
 
-                            if (funcionAnalisis) {
-                                await funcionAnalisis(projectName, archivo.name).then(respuestasRecibidas => {
-                                    for (let pregunta in respuestasRecibidas) {
-                                        agregarRespuesta(pregunta, respuestasRecibidas[pregunta]);
-                                    }
-                                    setProgress((index + 1) / totalFiles * 100);
-                                });
-                            } else {
-                                console.error('funcionAnalisis es undefined');
-                                setModalText('Error: funcionAnalisis es undefined');
-                                setShowButton(true);
-                                setHasError(true);
+                                const funcionAnalisis = tipoAnalisis === 'grupales' ? Grupales : (tipoAnalisis === 'profundidad' ? Profundidad : undefined);
+
+                                if (funcionAnalisis) {
+                                    await funcionAnalisis(projectName, archivo.name).then(respuestasRecibidas => {
+                                        for (let pregunta in respuestasRecibidas) {
+                                            agregarRespuesta(pregunta, respuestasRecibidas[pregunta]);
+                                        }
+                                        setProgress((index + 1) / totalFiles * 100);
+                                    });
+                                } else {
+                                    console.error('funcionAnalisis es undefined');
+                                    setModalText('Error: funcionAnalisis es undefined');
+                                    setShowButton(true);
+                                    setHasError(true);
+                                }
                             }
+                            onModalData(respuestas);
+                            setModalText('Análisis completo')
+                            setShowButton(true)
+                            setVisible(false);
                         }
-                        onModalData(respuestas);
-                        setModalText('Análisis completo')
-                        setShowButton(true)
-                        setVisible(false);
                     }
-                }
-            };
+                } catch {
+                    setModalText('Error al obtener nombres de proyectos');
+                    setShowButton(true);
+                    setHasError(true);
+                    onModalData('Error al obtener nombres de proyectos')
+                };
 
-            fetchProjectNames();
+                fetchProjectNames();
+            }
+
+        } else {
+            console.log('nada')
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isOpen, projectName, tipoAnalisis]);
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, [isOpen, projectName, tipoAnalisis]);
 
     return (
         <Modal
