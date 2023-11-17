@@ -70,8 +70,6 @@ export default function Chat() {
     const [inputValue, setInputValue] = useState('');
     const [questions, setQuestions] = useState<string[]>([]);
 
-    console.log(projectId);
-
     const fetchData = useCallback(async () => {
         const { data, error } = await supabaseClient
             .from('proyectos')
@@ -290,7 +288,7 @@ export default function Chat() {
 
             </div>
 
-            {isModalOpen && <ModalInteractive isOpen={isModalOpen} projectName={projectId} onModalData={handleModalData} tipoAnalisis={getTipoAnalisis(project?.type)} />}
+            <ModalInteractive isOpen={isModalOpen} projectName={projectId} onModalData={handleModalData} tipoAnalisis={getTipoAnalisis(project?.type)} />
             {/* <ModalInteractive isOpen={isModalOpen} projectName={projectId} onModalData={handleModalData} tipoAnalisis={'grupales'} /> */}
 
             {table && (
