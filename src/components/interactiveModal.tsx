@@ -40,7 +40,7 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
             setVisible(true);
             setProgress(10);
             setArchivoActual("Analizando Información");
-            setModalText(`Analizando ${archivoActual}`);
+            // setModalText(`Analizando ${archivoActual}`);
 
             const fetchProjectNames = async () => {
                 const { data, error } = await supabaseClient
@@ -67,8 +67,8 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
                     } else if (filteredData) {
                         for (let index = 0; index < filteredData.length; index++) {
                             const archivo = filteredData[index];
-                            setArchivoActual(`Analizando ${archivo.name}`);
-                            setModalText(`Analizando ${archivo.name}`);
+                            // setArchivoActual(`Analizando ${archivo.name}`);
+                            // setModalText(`Analizando ${archivo.name}`);
 
                             const funcionAnalisis = tipoAnalisis === 'grupales' ? Grupales : (tipoAnalisis === 'profundidad' ? Profundidad : undefined);
 
