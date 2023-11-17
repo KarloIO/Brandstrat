@@ -67,7 +67,8 @@ export default async function Grupales(projectName: string, fileName: string) {
 
             const model = new OpenAI({
                 modelName: "gpt-3.5-turbo-1106",
-                temperature: 0.0,
+                temperature: 0.1,
+                maxTokens: 10000
             });
 
             const memory = new BufferWindowMemory({ k: 12 })

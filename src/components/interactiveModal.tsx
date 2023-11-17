@@ -13,8 +13,15 @@ interface ModalInteractiveProps {
     onModalData: (data: any) => void;
     tipoAnalisis: 'grupales' | 'profundidad';
 }
+const path = require('path');
 
 export default function ModalInteractive({ isOpen, projectName, onModalData, tipoAnalisis }: ModalInteractiveProps) {
+
+    const relativePath = './test/data/05-versions-space.pdf';
+
+    const absolutePath = path.resolve(relativePath);
+
+    console.log(absolutePath);
     
     const [visible, setVisible] = useState(isOpen);
     const [progress, setProgress] = useState(0);
