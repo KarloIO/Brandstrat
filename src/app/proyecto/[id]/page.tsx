@@ -70,6 +70,8 @@ export default function Chat() {
     const [inputValue, setInputValue] = useState('');
     const [questions, setQuestions] = useState<string[]>([]);
 
+    console.log(projectId);
+
     const fetchData = useCallback(async () => {
         const { data, error } = await supabaseClient
             .from('proyectos')
