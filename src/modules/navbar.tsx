@@ -28,60 +28,30 @@ export default function NavigationBar() {
     const supabase = createClientComponentClient();
 
     useEffect(() => {
-
-        const fetchUser = async () => {
-            try {
-                const { data: { user }, error } = await supabase.auth.getUser();
-                if (user !== null) {
-                    setUser(user)
-                    console.log(user);
-                } else {
-                    console.log(error)
-                    setUser('')
-                }
+        const checkUserSession = async () => {
+            const session = await CheckSession();
+            if (session.session == null) {
+                router.push('/auth')
+            } else {
+                setUser(session.userData);
                 setIsLoading(false);
-            } catch (error) {
-                console.log(error)
-                setIsLoading(false);
+                setUserIsLoggedIn(true)
             }
-        }
-
-        fetchUser()
-
-    }, [supabase.auth])
+        };
+        checkUserSession();
+    }, [router]);
 
     const handleSignOut = async () => {
         try {
             const { error } = await supabase.auth.signOut();
             if (!error) {
-                console.log("Sign out successful!");
                 router.push("/");
             } else {
-                console.log("Sign out error:", error.message);
             }
         } catch (error: any) {
             console.error("Sign out error:", error.message);
         }
     }
-
-    useEffect(() => {
-        async function checkUserSession() {
-            try {
-                const result = await CheckSession();
-                setUserIsLoggedIn(result.session);
-                console.log(result);
-            } catch (error) {
-                console.error(error);
-            }
-        }
-
-        checkUserSession();
-
-        if (userIsLoggedIn === null) {
-            router.push("/auth");
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     return (
         isLoading ? (
@@ -99,16 +69,18 @@ export default function NavigationBar() {
                     {userIsLoggedIn && (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Avatar src={undefined} alt="user" className="bg-[#E7E7E8] text-[#1F1F21] cursor-pointer" aria-label="user" name={user.email} />
+                                <Avatar src={user?.img} alt="user" className="bg-[#E7E7E8] text-[#1F1F21] cursor-pointer" aria-label="user" name={user.email} />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="w-56 mr-2">
-                                <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
+                                <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
 
-                                <DropdownMenuItem onClick={() => router.push('/dashboard')}>
-                                    <IconBrandAsana className='w-[16px]' />
-                                    Panel de Control
-                                </DropdownMenuItem>
+                                {user.role === 'admin' && (
+                                    <DropdownMenuItem onClick={() => router.push('/dashboard')}>
+                                        <IconBrandAsana className='w-[16px]' />
+                                        Panel de Control
+                                    </DropdownMenuItem>
+                                )}
 
                                 <DropdownMenuGroup>
                                     <DropdownMenuItem onClick={() => router.push(`/profile/${user.email}`)}>

@@ -74,54 +74,33 @@ export default async function Grupales(projectName: string, fileName: string) {
             const chain = RetrievalQAChain.fromLLM(model, vectorStore.asRetriever(), memory)
 
             try {
-
                 const { data, error } = await supabaseClient
-                    .storage
-                    .from(project)
-                    .list('questions', {
-                        limit: 2,
-                        offset: undefined
-                    })
+                    .from('proyectos')
+                    .select('questions')
+                    .single()
 
-                const archivos = data!.filter(archivo => archivo.name !== '.emptyFolderPlaceholder');
+                if (error !== null) {
+                    console.error(`Error al obtener las preguntas:`, error);
+                    return;
+                }
 
-                const preguntasPromesas = archivos.map(async (archivo) => {
-                    const { data: archivoDescargado, error: errorDescarga } = await supabaseClient
-                        .storage
-                        .from(project)
-                        .download(`questions/${archivo.name}`)
+                const preguntasFiltradas = data.questions.map((p: string) => ({ pregunta: p }));
 
-                    if (errorDescarga !== null) {
-                        console.error(`Error al descargar el archivo ${archivo.name}:`, errorDescarga);
-                        return;
-                    }
-                    const texto = await archivoDescargado.text();
-                    const data = JSON.parse(texto);
-
-                    const preguntasFiltradas = data.preguntas.map((p: { pregunta: string }) => p.pregunta);
-
-                    return preguntasFiltradas;
-                });
-
-                const preguntas = await Promise.all(preguntasPromesas);
-
-                const preguntasAplanadas = preguntas.flat();
-
-                for (const pregunta of preguntasAplanadas) {
+                for (const { pregunta } of preguntasFiltradas) {
                     console.log(`------ Procesando pregunta: ${pregunta} ------`);
                     const preguntaGeneral = `${pregunta}. Please provide a summary based on the document content. Always respond in Spanish.`;
                     const response = await chain.call({ query: preguntaGeneral })
-                
+
                     if (!respuestas[pregunta]) {
                         respuestas[pregunta] = [];
                     }
-                
+
                     respuestas[pregunta].push({ name: nombreArchivo, respuesta: response.text });
-                
+
                     const tokens = encode(response.text);
                     totalTokens += tokens.length;
                 }
-    
+
                 console.log(`------ Terminado con el archivo: ${nombreArchivo}. Comenzando con el siguiente archivo ------`);
 
                 // await vectorStore.delete()

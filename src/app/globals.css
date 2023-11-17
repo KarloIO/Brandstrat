@@ -14,6 +14,13 @@
   color: #1F1F21;
 }
 
+.descriptions.id {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1F1F21;
+  cursor: default;
+}
+
 .progress span {
   font-size: 12px;
   line-height: 16px;

@@ -19,6 +19,7 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
     const [progress, setProgress] = useState(0);
     const [archivoActual, setArchivoActual] = useState("");
     let respuestas: { [key: string]: { name: string, respuesta: string }[] } = {};
+    const [hasError, setHasError] = useState(false);
 
     const [modalText, setModalText] = useState("Analizando Información");
     const [showButton, setShowButton] = useState(false);
@@ -39,42 +40,59 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
             setProgress(10);
             setArchivoActual("Analizando Información");
             setModalText(`Analizando ${archivoActual}`);
-    
+
             const fetchProjectNames = async () => {
                 const { data, error } = await supabaseClient
                     .storage
                     .from(projectName)
                     .list()
-    
-                if (error) {
+
+                if (error || !data || data.length === 0) {
                     console.error('Error al obtener nombres de proyectos:', error);
+                    setModalText('No hay archivos en el proyecto');
+                    setShowButton(true);
+                    setHasError(true);
+                    onModalData('No hay archivos en el proyecto')
                 } else {
                     console.log(data);
                     const filteredData = data?.filter(archivo => archivo.name !== 'questions');
                     const totalFiles = filteredData?.length || 0;
-    
-                    if (filteredData) {
+
+                    if (totalFiles === 0) {
+                        setModalText('No hay preguntas para leer');
+                        setShowButton(true);
+                        setHasError(true);
+                        onModalData('No hay preguntas en el proyecto')
+                    } else if (filteredData) {
                         for (let index = 0; index < filteredData.length; index++) {
                             const archivo = filteredData[index];
                             setArchivoActual(`Analizando ${archivo.name}`);
                             setModalText(`Analizando ${archivo.name}`);
-            
-                            const funcionAnalisis = tipoAnalisis === 'grupales' ? Grupales : Profundidad;
-            
-                            await funcionAnalisis(projectName, archivo.name).then(respuestasRecibidas => {
-                                for (let pregunta in respuestasRecibidas) {
-                                    agregarRespuesta(pregunta, respuestasRecibidas[pregunta]);
-                                }
-                                setProgress((index + 1) / totalFiles * 100);
-                            });
+
+                            const funcionAnalisis = tipoAnalisis === 'grupales' ? Grupales : (tipoAnalisis === 'profundidad' ? Profundidad : undefined);
+
+                            if (funcionAnalisis) {
+                                await funcionAnalisis(projectName, archivo.name).then(respuestasRecibidas => {
+                                    for (let pregunta in respuestasRecibidas) {
+                                        agregarRespuesta(pregunta, respuestasRecibidas[pregunta]);
+                                    }
+                                    setProgress((index + 1) / totalFiles * 100);
+                                });
+                            } else {
+                                console.error('funcionAnalisis es undefined');
+                                setModalText('Error: funcionAnalisis es undefined');
+                                setShowButton(true);
+                                setHasError(true);
+                            }
                         }
                         onModalData(respuestas);
                         setModalText('Análisis completo')
                         setShowButton(true)
+                        setVisible(false);
                     }
                 }
             };
-    
+
             fetchProjectNames();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -83,7 +101,12 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
     return (
         <Modal
             isOpen={visible}
-            onOpenChange={() => setVisible(false)}
+            onOpenChange={() => {
+                setVisible(false);
+                setHasError(false);
+                setShowButton(false);
+                setProgress(0);
+            }}
             className="w-full h-auto max-w-[464px] max-h-[600px] rounded-lg"
             isDismissable={false}
             aria-label="Nombre de tu modal"
@@ -91,12 +114,12 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
             <ModalContent aria-label="Nombre de tu modal" className="w-full h-auto">
 
                 <ModalHeader aria-label="Nombre de tu modal">
-                    <h2>{modalText}</h2>
+                    <h2 className='text-[#1F1F21]'>{modalText}</h2>
                 </ModalHeader >
 
                 <ModalBody className="w-full h-full flex flex-col items-center justify-center gap-6 p-3" aria-label="Nombre de tu modal">
-                    {progress < 100 ? <Progress aria-label="Nombre de tu modal" value={progress} color="success" /> : null}
-                    {showButton ? <Button className='w-full rounded text-sm font-semibold bg-[#EF7A17] text-white' onClick={() => setVisible(false)}>Visualizar Tabla</Button> : null}
+                    {!hasError && progress < 100 ? <Progress aria-label="Nombre de tu modal" value={progress} color="success" /> : null}
+                    {showButton ? <Button className='w-full rounded text-sm font-semibold bg-[#1F1F21] text-white' onClick={() => setVisible(false)}>{hasError ? 'Volver' : 'Visualizar Tabla'}</Button> : null}
                 </ModalBody>
 
 

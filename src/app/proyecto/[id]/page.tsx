@@ -1,46 +1,15 @@
 'use client';
-import React, { useState, useEffect, useRef } from "react";
-import { Avatar, Divider, Tooltip, Select, SelectItem, Progress, Modal, ModalContent, ModalBody, Button, CircularProgress } from "@nextui-org/react";
-// import { sendMessageToBot } from "@/pages/api/bot";
+import { Avatar, Divider, Tooltip, Select, SelectItem, Progress, Modal, ModalContent, ModalBody, Button, CircularProgress, Dropdown, DropdownTrigger, DropdownItem, DropdownMenu, ScrollShadow, ModalFooter, ModalHeader } from "@nextui-org/react";
 import { useRouter, usePathname } from "next/navigation";
 import CheckSession from '@/lib/checkSession'
 import supabaseClient from '@/lib/supabase'
 import '@/styles/chat.css'
 
-import { IconMenu2, IconWand, IconArrowForward, IconArrowNarrowLeft, IconLink, IconFileFilled, IconBackspaceFilled, IconMaximize } from '@tabler/icons-react';
+import { IconWand, IconArrowForward, IconArrowNarrowLeft, IconLink, IconColumns, IconFileFilled, IconBackspaceFilled, IconMaximize, IconMenu2, IconTrash, IconFiles, IconQuestionMark, IconUsersGroup, IconX, IconSend } from '@tabler/icons-react';
 
 import ModalInteractive from '@/components/interactiveModal';
+import { useCallback, useEffect, useRef, useState } from "react";
 
-
-type Message = {
-    sender: string;
-    content: string;
-    timestamp: string;
-    avatar: string;
-    data: string;
-};
-
-type ChatModuleProps = {
-    hover: boolean;
-    setHover: React.Dispatch<React.SetStateAction<boolean>>;
-    handleSendClick: (value: string) => void;
-    inputValue: string;
-    handleMessageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-};
-
-interface Project {
-    name: string;
-    description: string;
-    files: Array<{ name: any, size: any, url: string }>;
-    removedFiles: Array<{ name: any }>
-}
-
-interface FileWithId extends File {
-    id: number;
-    url: string;
-    name: string;
-    title: string;
-}
 // const ChatModule: React.FC<ChatModuleProps> = ({ hover, setHover, handleSendClick, inputValue, handleMessageChange }) => {
 
 //     return (
@@ -57,164 +26,120 @@ interface FileWithId extends File {
 //     );
 // };
 
-type Respuesta = {
-    name: string;
-    respuesta: string;
-};
+interface Project {
+    description: string;
+    files: any;
+    id: string;
+    questions: any;
+    status: string;
+    type: string;
+    users: {
+        user: {
+            email: string;
+            id: string;
+            img: string;
+            name: string;
+            role: string;
+        }
+    }
+}
 
-type PreguntaData = {
+interface FileWithId extends File {
+    id: number;
+    url: string;
+    name: string;
     title: string;
-    respuestas: Respuesta[];
-};
+}
 
 export default function Chat() {
     const router = useRouter();
     const pathname = usePathname();
-    const [hover, setHover] = useState(false);
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [inputValue, setInputValue] = useState("");
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [timestamps, setTimestamps] = useState<{ sender: string; content: string; timestamp: string; }[]>([]);
-    const [data, setData] = useState("");
-    const [message, setMessage] = useState("");
-    const messagesContainerRef = useRef<HTMLDivElement>(null);
-    const [isTableFinished, setTableFinished] = useState(false);
-    const [tooltipContent, setTooltipContent] = useState('Copiar URL');
-    const [projects, setProjects] = useState<Project[]>([])
-    const [filesOpen, setFilesOpen] = useState(false)
+    const projectId = pathname.split("/")[2];
+    const [project, setProject] = useState<Project | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [table, isTableFinished] = useState(false);
+    const [filesOpen, setFilesOpen] = useState(false);
     const [files, setFiles] = useState<FileWithId[]>([]);
-    const [loadingFileIndex, setLoadingFileIndex] = useState<number | null>(null);
     const [completedFiles, setCompletedFiles] = useState<number[]>([]);
+    const [loadingFileIndex, setLoadingFileIndex] = useState<number | null>(null);
     const [progress, setProgress] = useState(0);
     const [isSaving, setIsSaving] = useState(false);
-    const [isLoadModalVisible, setLoadModalVisible] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [loadMessage, setLoadMessage] = useState('Cargando archivos...');
-    const [entrevistaData, setEntrevistaData] = useState<PreguntaData[]>([]);
-    const [preguntaSeleccionada, setPreguntaSeleccionada] = useState<PreguntaData | null>(entrevistaData[0] || null);
-    const [questionsOpen, setQuestionsOpen] = useState(false);
-    const [questions, setQuestions] = useState<FileWithId[]>([]);
-    const [loadingQuestionIndex, setLoadingQuestionIndex] = useState<number | null>(null);
-    const [completedQuestions, setCompletedQuestions] = useState<number[]>([]);
-    const [projectName, setProjectName] = useState("");
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [newFiles, setNewFiles] = useState<FileWithId[]>([]);
+    const [questionsOpen, setQuestionsOpen] = useState(false)
+    const [inputValue, setInputValue] = useState('');
+    const [questions, setQuestions] = useState<string[]>([]);
 
-    const handleStartClick = async () => {
-        setProjectName(pathname.replace('/proyecto/', ''));
-        setIsModalOpen(true);
-    };
-
-    const handleModalData = (data: { [key: string]: any[] }) => {
-        const preguntaDataArray = Object.keys(data).map(key => ({
-            title: key,
-            respuestas: data[key].map(respuesta => {
-                if (typeof respuesta === 'string') {
-                    return { name: respuesta, respuesta: respuesta };
-                } else if (typeof respuesta === 'object' && respuesta !== null) {
-                    return { name: respuesta.name, respuesta: respuesta.respuesta };
-                } else {
-                    console.error(`Respuesta no es una cadena ni un objeto válido: ${respuesta}`);
-                    return { name: '', respuesta: '' };
-                }
-            })
-        }));
-
-        setEntrevistaData(preguntaDataArray);
-        setTableFinished(true)
-    };
-
-    const handleMessageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setInputValue(event.target.value);
-    };
-
-    const handleSendClick = async (value: string) => {
-        setInputValue(value);
-        setMessage(value);
-        setIsModalVisible(true);
-        await handleSendMessage();
-    };
-
-    const handleSendMessage = async () => {
-        setInputValue('')
-        const newMessage: Message = {
-            sender: "user",
-            content: inputValue,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            avatar: '',
-            data: data
-        };
-
-        const updatedMessages: Message[] = [...messages, newMessage];
-        setMessages(updatedMessages);
-
-        setMessages(updatedMessages);
-        setMessage("");
-        setTimestamps([...timestamps, newMessage]);
-
-        // const botResponses = await sendMessageToBot([inputValue]);
-        // console.log(botResponses[0]);
-
-
-        const autoResponse: Message = {
-            sender: "bot",
-            content: '',
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            avatar: '',
-            data: data
-        };
-
-        setTimeout(() => {
-            setMessages([...updatedMessages, autoResponse]);
-        }, 1000);
-    };
-
-    useEffect(() => {
-        if (messagesContainerRef.current) {
-            const lastMessage = messagesContainerRef.current.lastElementChild;
-            lastMessage?.scrollIntoView({ behavior: 'smooth' });
-        }
-    }, [messages]);
-
-    const handleCopyLink = () => {
-        navigator.clipboard.writeText(window.location.href);
-        setTooltipContent('URL copiado exitosamente');
-        setTimeout(() => setTooltipContent('Copiar URL'), 2000);
-    }
-
-    useEffect(() => {
-        fetchProjects()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
-    const fetchProjects = async () => {
-        const projectId = pathname?.split('/')[2];
+    const fetchData = useCallback(async () => {
         const { data, error } = await supabaseClient
             .from('proyectos')
             .select('*')
-            .eq('name', projectId);
+            .eq('id', projectId)
+            .single()
+        setProject(data);
+        setFiles(data?.files)
+    }, [projectId]);
 
-        if (error) {
-            console.error('Error al obtener proyectos:', error)
+    useEffect(() => {
+        fetchData()
+    }, [fetchData])
+
+    const handleStart = () => {
+        setIsModalOpen(true);
+    }
+
+    const handleModalData = (data: any) => {
+        console.log(data);
+    }
+
+    function getTipoAnalisis(type: string | undefined): "grupales" | "profundidad" {
+        const lowerCaseType = type?.toLowerCase();
+        if (lowerCaseType === "grupales" || lowerCaseType === "profundidad") {
+            return lowerCaseType;
         } else {
-            setProjects(data)
-            const questions = data[0]?.questions || [];
-            setQuestions(questions.flat());
+            return "grupales";
         }
     }
 
+    const handleFiles = (projectId: string) => {
+        console.log(projectId);
+        setFilesOpen(true)
+    };
+
+    const toggleFilesOpen = () => {
+        setFilesOpen(prevState => !prevState);
+    };
+
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files) {
+            const newFilesToAdd = Array.from(event.target.files) as FileWithId[];
+            newFilesToAdd.forEach(file => file.id = Date.now());
+            const newUniqueFiles = newFilesToAdd.filter(newFile =>
+                !files?.some(existingFile => existingFile.name === newFile.name)
+            );
+            setNewFiles(oldFiles => {
+                const updatedFiles = [...oldFiles, ...newUniqueFiles];
+                console.log(updatedFiles);
+                return updatedFiles;
+            });
+            event.target.value = '';
+        }
+    }
+
+    const handleFileDelete = async (fileName: string) => {
+        setFiles(prevFiles => prevFiles.filter(file => file.name !== fileName));
+    };
+
     const updateProjectFiles = async (files: FileWithId[], url: string) => {
-        const newFiles = files.map(file => [({ name: file.name, size: parseFloat((file.size / (1024 * 1024)).toFixed(2)), url: url })]);
-
+        const newFiles = files.map(file => ({ name: file.name, size: parseFloat((file.size / (1024 * 1024)).toFixed(2)), url: url }));
         console.log(newFiles)
-        console.log(projects[0].name)
-
         setTimeout(async () => {
             const { data, error } = await supabaseClient
                 .from('proyectos')
                 .update({
                     files: newFiles
                 })
-                .eq('name', projects[0].name)
+                .eq('id', projectId)
                 .select()
             console.log(data)
             if (error) {
@@ -226,100 +151,9 @@ export default function Chat() {
         }, 4000);
     }
 
-    const updateProjectQuestions = async (files: FileWithId[], url: string) => {
-        const newQuestions = files.map(file => [({ name: file.name, size: (file.size / (1024 * 1024)), url: url })]);
-
-        console.log(newQuestions)
-        console.log(projects[0].name)
-
-        setTimeout(async () => {
-            const { data, error } = await supabaseClient
-                .from('proyectos')
-                .update({
-                    questions: newQuestions
-                })
-                .eq('name', projects[0].name)
-                .select()
-            console.log(data)
-            if (error) {
-                console.error('Error al actualizar los archivos del proyecto:', error);
-            } else {
-                console.log('Archivos del proyecto actualizados con éxito:', data);
-                router.refresh();
-            }
-        }, 1000);
-    }
-
-    useEffect(() => {
-        const checkUserSession = async () => {
-            const session = await CheckSession();
-            if (session.session == null) {
-                console.log("El usuario no está logueado");
-                router.push('/auth')
-            }
-        };
-        checkUserSession();
-    }, [router]);
-
-    const handleFilesOpen = () => {
-        setFilesOpen(!filesOpen)
-    }
-
-    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.files) {
-            const newFiles = Array.from(event.target.files) as FileWithId[];
-            newFiles.forEach(file => file.id = Date.now());
-
-            const newUniqueFiles = newFiles.filter(newFile =>
-                !files.some(existingFile => existingFile.name === newFile.name)
-            );
-
-            setFiles(oldFiles => [...oldFiles, ...newUniqueFiles]);
-
-            event.target.value = '';
-        }
-    };
-
-    const handleFileDelete = async (file: string) => {
-        console.log(file)
-
-        console.log(projects[0].name)
-
-        try {
-            const { data, error } = await supabaseClient
-                .storage
-                .from(projects[0].name)
-                .remove([file])
-            console.log(data);
-            console.log(error);
-        } catch (error) {
-            console.log(error);
-        }
-
-        if (data !== null) {
-            const archivosActualizados = projects[0].files.flat().map(archivo => {
-                if (archivo.name !== file) {
-                    return archivo;
-                }
-            }).filter(Boolean);
-            console.log(archivosActualizados);
-            const { data, error } = await supabaseClient
-                .from('proyectos')
-                .update({ files: archivosActualizados })
-                .eq('name', projects[0].name)
-                .select();
-            console.log(data);
-            if (data) {
-                window.location.reload();
-            } else {
-                console.log('algo fallo')
-            }
-        }
-    };
-
     const handleFileSave = async () => {
         setIsSaving(true);
-        const filesToSave = files.filter(file => !completedFiles.includes(file.id));
+        const filesToSave = newFiles.filter(file => !completedFiles.includes(file.id));
         filesToSave.forEach(async (file: any, index) => {
             setTimeout(async () => {
                 setLoadingFileIndex(file.id);
@@ -329,13 +163,11 @@ export default function Chat() {
                 if (error) {
                     console.error('Error al listar los buckets:', error)
                 } else {
-                    const bucketExists = data.some(bucket => bucket.id === projects[0]?.name)
-
+                    const bucketExists = data.some(bucket => bucket.id === projectId)
                     if (!bucketExists) {
-                        const { data, error } = await supabaseClient.storage.createBucket(projects[0]?.name, {
+                        const { data, error } = await supabaseClient.storage.createBucket(projectId, {
                             public: true,
                         })
-
                         if (error) {
                             console.error('Error al crear el bucket:', error)
                         } else {
@@ -343,31 +175,27 @@ export default function Chat() {
                         }
                     }
                 }
-
-
-                const filePath = `${file.name}`;
+                const filePath = file.name;
+                console.log(filePath);
                 const { data: uploadData, error: uploadError } = await supabaseClient
                     .storage
-                    .from(projects[0]?.name)
+                    .from(projectId)
                     .upload(filePath, file)
                 if (uploadError) {
                     console.error('Hubo un error subiendo el archivo:', uploadError);
                 } else {
                     const { data, error } = await supabaseClient
                         .storage
-                        .from(projects[0]?.name)
+                        .from(projectId)
                         .createSignedUrl(uploadData.path, 7889400)
                     console.log(data)
                     const fileUrl = data?.signedUrl || '';
                     console.log('Archivo subido con éxito:', uploadData);
-
                     if (file.id === filesToSave[filesToSave.length - 1].id) {
                         setIsSaving(false);
                         await updateProjectFiles(filesToSave, fileUrl);
                     }
                 }
-
-
                 const intervalId = setInterval(() => {
                     setProgress(oldProgress => {
                         if (oldProgress >= 100) {
@@ -384,519 +212,371 @@ export default function Chat() {
                 }, 600);
             }, index * 3000);
         });
+    }
+
+    const toggleQuestionsOpen = () => {
+        setQuestionsOpen(prevState => !prevState);
     };
 
-    const exportToPDF = (data: PreguntaData[]) => {
-        // Crear un array para almacenar las filas de la tabla
-        const tableBody: any[] = [];
-
-        // Añadir los nombres de los entrevistados a la primera fila
-        const headerRow = [''];
-        data[0].respuestas.forEach((respuesta) => {
-            headerRow.push(respuesta.name);
-        });
-        tableBody.push(headerRow);
-
-        // Para cada pregunta en los datos
-        data.forEach((preguntaData) => {
-            // Añadir la pregunta en la primera columna
-            const row = [preguntaData.title];
-
-            // Para cada respuesta en las respuestas de la pregunta
-            preguntaData.respuestas.forEach((respuesta) => {
-                // Añadir la respuesta a la celda correspondiente
-                row.push(respuesta.respuesta);
-            });
-
-            tableBody.push(row);
-        });
-
-        // Crear la definición del documento
-        const docDefinition = {
-            content: [
-                { text: 'Reporte de Preguntas', style: 'header' },
-                {
-                    table: {
-                        headerRows: 1,
-                        body: tableBody
-                    }
-                }
-            ],
-            styles: {
-                header: {
-                    fontSize: 18,
-                    bold: true,
-                    margin: [0, 0, 0, 10]
-                }
-            }
-        };
-    };
-
-    const handleExportToExcel = () => {
-        exportToPDF(entrevistaData);
-    };
-
-    const handleQuestionsOpen = () => {
+    const handleQuestions = () => {
         setQuestionsOpen(!questionsOpen);
     }
 
-    const handleQuestionUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.files) {
-            const newQuestions = Array.from(event.target.files) as FileWithId[];
-            newQuestions.forEach(question => question.id = Date.now());
+    const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setInputValue(event.target.value);
+    }
 
-            const newUniqueQuestions = newQuestions.filter(newQuestion =>
-                !questions.some(existingQuestion => existingQuestion.name === newQuestion.name)
-            );
+    const handleButtonClick = () => {
+        setQuestions(oldQuestions => [...oldQuestions, inputValue]);
+        setInputValue('');
+    }
 
-            setQuestions(oldQuestions => [...oldQuestions, ...newUniqueQuestions]);
+    const handleQuestionDelete = (index: number) => {
+        setQuestions(oldQuestions => oldQuestions.filter((_, i) => i !== index));
+    }
 
-            event.target.value = '';
-        }
-    };
-
-    const handleQuestionDelete = async (questionId: any) => {
-        const questionToDelete = questionId;
-        if (questionToDelete) {
-            try {
-                const { data, error } = await supabaseClient
-                    .storage
-                    .from(projects[0].name)
-                    .remove([`questions/${questionToDelete}`]);
-                const response = data;
-                if (response !== null) {
-                    const removedQuestion: string = response[0].name.replace('questions/', '');
-                    console.log(removedQuestion);
-
-                    const updatedQuestions = questions.filter(question => question.name !== removedQuestion);
-
-                    const { data, error } = await supabaseClient
-                        .from('proyectos')
-                        .update({ questions: updatedQuestions })
-                        .eq('name', projects[0].name)
-                        .select();
-                    console.log(data);
-                    if (data) {
-                        window.location.reload();
-                    } else {
-                        console.log('algo fallo')
-                    }
-                } else {
-                    console.log('algo fallo')
-                }
-            } catch (error) {
-                console.error('Hubo un error eliminando la pregunta:', error);
-            }
-        } else {
-            console.log('no hay archivo')
-        }
-    };
-
-    const handleQuestionSave = async () => {
-        setIsSaving(true);
-        const questionsToSave = questions.filter(question => !completedQuestions.includes(question.id));
-        questionsToSave.forEach(async (question, index) => {
-            setTimeout(async () => {
-                setLoadingQuestionIndex(question.id);
-                setProgress(0);
-                console.log(`Guardando pregunta: ${question.name}`);
-                const { data, error } = await supabaseClient.storage.listBuckets()
-                if (error) {
-                    console.error('Error al listar los buckets:', error)
-                } else {
-                    const bucketExists = data.some(bucket => bucket.id === projects[0]?.name)
-
-                    if (!bucketExists) {
-                        const { data, error } = await supabaseClient.storage.createBucket(projects[0]?.name, {
-                            public: true,
-                        })
-
-                        if (error) {
-                            console.error('Error al crear el bucket:', error)
-                        } else {
-                            console.log('Bucket creado con éxito:', data)
-                        }
-                    }
-                }
-
-                const filePath = `questions/${question.name}`;
-                const { data: uploadData, error: uploadError } = await supabaseClient
-                    .storage
-                    .from(projects[0]?.name)
-                    .upload(filePath, question);
-                console.log(uploadData)
-                if (uploadError) {
-                    console.error('Hubo un error subiendo la pregunta:', uploadError);
-                } else {
-                    console.log(uploadData.path.replace('questions/', ''))
-                    const { data, error } = await supabaseClient
-                        .storage
-                        .from(projects[0]?.name)
-                        .createSignedUrl(uploadData.path, 7889400)
-                    const questionUrl = data?.signedUrl || '';
-                    console.log('Pregunta subida con éxito:', questionUrl);
-
-                    if (question.id === questionsToSave[questionsToSave.length - 1].id) {
-                        setIsSaving(false);
-                        await updateProjectQuestions(questionsToSave, questionUrl,);
-                    }
-                }
-
-                const intervalId = setInterval(() => {
-                    setProgress(oldProgress => {
-                        if (oldProgress >= 100) {
-                            clearInterval(intervalId);
-                            setCompletedQuestions(oldArray => [...oldArray, question.id]);
-                            if (question.id === questionsToSave[questionsToSave.length - 1].id) {
-                                setIsSaving(false);
-                            }
-                            setLoadingQuestionIndex(null);
-                            return 100;
-                        }
-                        return oldProgress + 10;
-                    });
-                }, 600);
-            }, index * 7000);
-        });
-    };
+    const handleSaveQuestions = async () => {
+        const { data, error } = await supabaseClient
+            .from('proyectos')
+            .update({ questions: questions })
+            .eq('id', projectId)
+            .single()
+        console.log(data);
+        console.log(questions);
+    }
 
     return (
 
-        <div className="w-screen h-auto flex flex-col items-center justify-start px-32">
+        <div className="w-screen h-auto flex flex-col items-center justify-start">
 
-            <div className="w-screen h-14 bg-white flex flex-row items-center justify-between px-8 py-3">
+            <div className="w-full h-14 min-h-[56px] bg-white border-b-1 border-[#89898A] flex flex-row items-center justify-between px-8">
 
-                <div className="w-auto h-auto max-h-8 flex flex-row px-3 py-2 gap-1 items-center justify-start border-2 border-[#EFF0F3] rounded-lg hover:border-[#F29545] cursor-pointer" onClick={() => router.push('/')}>
+                <Button className="bg-[#1F1F21] min-w-[80px] h-[36px] flex items-center justify-center text-md font-semibold text-[#E7E7E8] rounded-md flex-row gap-1" onClick={() => router.push('/')}> <IconArrowNarrowLeft size={20} /> Regresar</Button>
 
-                    <IconArrowNarrowLeft size={20} />
+                <div className="w-auto h-10 flex flex-row items-center justify-end gap-4">
 
-                    <span className='w-fit font-semibold text-[#F29545] text-sm'>Regresar</span>
-
-                </div>
-
-                <div className="w-auto h-auto max-h-8 flex flex-row gap-4 items-center justify-start">
-
-                    <Tooltip content={tooltipContent} className="rounded-md" delay={0} closeDelay={0} showArrow>
-
-                        <div className="w-auto h-auto max-h-8 flex flex-row px-2 py-2 gap-1 items-center justify-start border-2 border-[#EFF0F3] bg-white rounded-lg hover:border-[#F29545] cursor-pointer" onClick={handleCopyLink}>
-
-                            <IconLink size={20} />
-
-                        </div>
-
+                    <Tooltip content="Copiar URL" className="rounded">
+                        <Button className="min-w-[32px] h-auto p-[6px] rounded-lg border-2 border-[#E7E7E8] bg-transparent">
+                            <IconLink size={20} className="text-[#1F1F21]" />
+                        </Button>
                     </Tooltip>
 
-                    <Divider orientation="vertical" className="divider h-[24px] w-[2px] rounded" />
+                    <Divider orientation="vertical" className="bg-[#E7E7E8] w-[2px] h-6" />
 
-                    <div aria-label="Descripción accesible" className="w-auto h-auto max-h-8 flex flex-row px-3 py-2 gap-1 items-center justify-start rounded-lg bg-[#F29545] cursor-pointer" onClick={handleStartClick}>
+                    <Button className="bg-[#1F1F21] min-w-[80px] h-[36px] flex items-center justify-center text-md font-semibold text-[#E7E7E8] rounded-md" onClick={handleStart}>Comenzar</Button>
 
-                        <span className='w-fit font-semibold text-white text-sm'>Comenzar</span>
+                    <Divider orientation="vertical" className="bg-[#E7E7E8] w-[2px] h-6" />
 
-                    </div>
-
-                    <Divider orientation="vertical" className="divider h-[24px] w-[2px] rounded" />
-
-                    <div className="trashcontainer border-2 border-[#FF6363] rounded-lg w-auto h-auto max-w-[34px] max-h-[34px] flex p-1 cursor-pointer hover:bg-[#FF6363]">
-                        <IconMenu2 size={24} className="trash" />
-                    </div>
+                    <Dropdown aria-label='dropdown' classNames={{
+                        content: "border border-[#1F1F21] bg-white mt-2",
+                    }}
+                        className="rounded-md"
+                    >
+                        <DropdownTrigger>
+                            <IconMenu2 size={18} className='text-[#89898A] cursor-pointer hover:text-[#1F1F21]' />
+                        </DropdownTrigger>
+                        <DropdownMenu aria-label='menu'>
+                            <DropdownItem aria-label='files' key='files' startContent={<IconFiles />} className="custom-dropdown-item rounded" onClick={() => handleFiles(projectId)}>Archivos</DropdownItem>
+                            <DropdownItem aria-label='questions' key='questions' startContent={<IconQuestionMark />} className="custom-dropdown-item rounded" onClick={() => handleQuestions()}>Preguntas</DropdownItem>
+                            <DropdownItem isDisabled={!table} aria-label='table' key='table' startContent={<IconColumns />} className="custom-dropdown-item rounded" >Descargar Tabla</DropdownItem>
+                            <DropdownItem aria-label='access' key='access' startContent={<IconUsersGroup />} className="custom-dropdown-item rounded">Accesos</DropdownItem>
+                            <DropdownItem aria-label='delete' key='delete' startContent={<IconTrash />} className="custom-dropdown-item rounded" >Eliminar</DropdownItem>
+                        </DropdownMenu>
+                    </Dropdown>
 
                 </div>
 
             </div>
 
-            <div className="w-full max-w-7xl h-full pt-10 pb-10 flex flex-col items-center justify-start gap-5">
+            <ModalInteractive isOpen={isModalOpen} projectName={projectId} onModalData={handleModalData} tipoAnalisis={getTipoAnalisis(project?.type)} />
+            {/* <ModalInteractive isOpen={isModalOpen} projectName={projectId} onModalData={handleModalData} tipoAnalisis={'grupales'} /> */}
 
-                {/* <ChatModule hover={hover} setHover={setHover} handleSendClick={handleSendClick} inputValue={inputValue} handleMessageChange={handleMessageChange} /> */}
+            {table && (
 
-                {isModalVisible && (
-                    <div className="fixed inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-start pt-[94px] gap-4">
-                        {/* <ChatModule hover={hover} setHover={setHover} handleSendClick={handleSendClick} inputValue={inputValue} handleMessageChange={handleMessageChange} /> */}
+                <div className="w-full h-screen flex flex-col items-center justify-start pt-10 pb-[156px] gap-12 px-[80px] max-w-[1440px]" style={{ maxHeight: 'calc(100vh - 56px)' }}>
 
-                        <div className="messages max-h-6/12 flex flex-col items-center justify-start gap-4 overflow-auto scroll" ref={messagesContainerRef}>
-                            {messages.map((message, index) => (
-                                <div key={index}>
+                    <span className='descriptions id max-w-[800px] h-full min-h-[24px]' style={{ display: '-webkit-box', WebkitLineClamp: '1', WebkitBoxOrient: 'vertical', overflow: 'hidden', height: '24px' }}>
+                        {project?.description || 'Cargando Proyecto'}
+                    </span>
 
-                                    <div className="w-[640px] h-auto rounded-lg bg-white p-3 flex justify-between border-x-1 border-t-1 border-b-2 border-[#E0E0E0]">
+                    <div className="w-full h-full flex flex-row items-start justify-start gap-5">
 
-                                        <div className="w-full h-auto flex flex-row gap-2">
+                        <div className="border-[#1F1F21] border-2 w-1/4 h-full rounded-lg flex flex-col gap-2 p-2 overflow-hidden">
 
-                                            {message.sender === 'user' ? (
-                                                <Avatar className="min-w-[36px] min-h-[36px] max-w-[36px] max-h-[36px]" src="https://i.pravatar.cc/150?u=a042581f4e29026024d" />
-                                            ) : (
-                                                <IconWand size={36} />
-                                            )}
+                            <ScrollShadow hideScrollBar className='flex flex-col gap-2' >
 
-                                            <span className='w-full flex flex-row items-center justify-start break-words overflow-wrap break-word font-semibold'>{message.content}</span>
+                                <div className="border-2 border-[#1F1F21] w-full h-auto bg-white flex flex-row items-center justify-start px-3 py-4 gap-2 rounded-md">
+                                    <span className="w-full text-base font-bold text-[#1F1F21] cursor-default">¿A que tipo de informacion necesita acceder?</span>
+                                </div>
 
-                                        </div>
+                            </ScrollShadow>
+
+                        </div>
+
+                        <div className="w-3/4 h-full flex flex-row gap-2">
+
+                            <ScrollShadow orientation="horizontal" className="horizontal flex flex-row gap-2" >
+
+                                <div className="w-80 min-w-[310px] flex flex-col gap-2 cursor-default">
+
+                                    <div className="w-full h-11 min-h-[44px] rounded-md bg-white flex items-center justify-center">
+
+                                        <span className="text-base font-semibold text-[#1F1F21]">Mateo Aponte</span>
+
+                                    </div>
+
+                                    <div className="w-full h-full rounded-md bg-white flex flex-col items-start justify-start px-4 py-2 gap-2" style={{ maxHeight: 'calc(100vh - 256px)', overflow: 'auto' }}>
+
+                                        <ScrollShadow hideScrollBar>
+
+                                            <span className="text-base font-semibold text-[#1F1F21] overflow-auto pr-2">
+                                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem.
+                                            </span>
+
+                                        </ScrollShadow>
 
                                     </div>
 
                                 </div>
-                            ))}
 
-                        </div>
-                    </div>
-                )}
+                                <div className="w-80 min-w-[310px] flex flex-col gap-2 cursor-default">
 
-                <div className="w-full h-auto bg-white px-5 py-3 flex flex-row justify-between items-center rounded-lg border-x-1 border-t-1 border-b-2 border-[#E0E0E0]">
+                                    <div className="w-full h-11 min-h-[44px] rounded-md bg-white flex items-center justify-center">
 
-                    <div className="w-auto h-auto flex flex-col items-start justify-start cursor-default">
+                                        <span className="text-base font-semibold text-[#1F1F21]">Mateo Aponte</span>
 
-                        <h4 className="font-bold text-xl text-[#131315]">{projects[0]?.name}</h4>
+                                    </div>
 
-                        <span className="font-regular text-base text-[#8A90A7]">{projects[0]?.description}</span>
+                                    <div className="w-full h-full rounded-md bg-white flex flex-col items-start justify-start px-4 py-2 gap-2" style={{ maxHeight: 'calc(100vh - 256px)', overflow: 'auto' }}>
 
-                    </div>
+                                        <ScrollShadow hideScrollBar>
 
-                    <div className="w-auto h-full flex flex-row gap-5 items-center justify-center">
+                                            <span className="text-base font-semibold text-[#1F1F21] overflow-auto pr-2">
+                                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem.
+                                            </span>
 
-                        <div className="flex flex-col gap-0 items-start justify-start">
+                                        </ScrollShadow>
 
-                            <span className="font-bold text-base text-[#F29545] cursor-pointer" onClick={handleFilesOpen}>Archivos</span>
-
-                            <span className="font-normal text-base text-[#8A90A7] cursor-default">Inspeccionar Carpeta</span>
-
-                        </div>
-
-                        <Divider orientation="vertical" className="divider h-[38px] w-[2px] rounded" />
-
-                        <div className="flex flex-col gap-0 items-start justify-start">
-
-                            <span className="font-bold text-base text-[#F29545] cursor-pointer" onClick={handleQuestionsOpen}>Preguntas</span>
-
-                            <span className="font-normal text-base text-[#8A90A7] cursor-default">Inspeccionar Carpeta</span>
-
-                        </div>
-
-                    </div>
-
-                    <Modal
-                        backdrop="opaque"
-                        isOpen={filesOpen}
-                        onOpenChange={handleFilesOpen}
-                        classNames={{
-                            backdrop: "bg-gradient-to-t from-zinc-900 to-zinc-900/10 backdrop-opacity-20"
-                        }}
-                        className="w-full h-auto max-w-[464px] max-h-[600px] rounded-lg"
-                        isDismissable={false}
-                    >
-
-                        <ModalContent className="w-full h-auto">
-
-                            {(onClose) => (
-                                <div className="w-full h-full flex flex-col items-center justify-start gap-6 p-6">
-
-                                    <ModalBody className="w-full h-full flex flex-col items-center justify-start gap-6 p-0">
-
-                                        <div className="w-full h-full flex flex-col gap-2 cursor-default">
-                                            <span className=" font-bold text-xl text-[#31313A]">Archivos</span>
-
-                                            <div className="archives pr-1 flex flex-col items-start justify-start gap-2 max-h-[192px] overflow-auto">
-
-                                                {projects?.[0]?.files?.flat().map((file) => (
-                                                    <div key={file.name} className={`border-2 rounded-md w-full h-auto  flex flex-row px-2 py-1.5 items-center border-[#F29545]`}>
-                                                        <div className="w-full flex flex-row items-center justify-start gap-2">
-                                                            <IconFileFilled size={24} className="file active" />
-                                                            <div className="flex flex-col gap-0 p-0 w-full">
-                                                                <span className="text-sm font-semibold" style={{ color: '#F29545' }}>{file.name}</span>
-                                                                <span className="text-sm font-normal" style={{ color: '#F29545' }}>{(file.size)} MB</span>
-                                                            </div>
-                                                            <IconBackspaceFilled size={24} className="delete active cursor-pointer h-6" onClick={() => handleFileDelete(file.name)} />
-                                                        </div>
-                                                    </div>
-                                                ))}
-
-                                            </div>
-                                        </div>
-
-                                        <div className="w-full h-full flex flex-col gap-2 cursor-default">
-                                            <span className="w-full font-bold text-xl text-[#31313A]"></span>
-
-                                            <div className="pendings pr-1 flex flex-col items-start justify-start gap-2 max-h-[192px] overflow-auto">
-
-                                                {files.filter((file) => !completedFiles.includes(file.id)).map((file) => (
-                                                    <div key={file.id} className={`border-2 rounded-md w-full h-auto max-h-[60px] flex flex-row px-2 py-1.5 items-center border-[#8A90A7]`}>
-                                                        <div className="w-full flex flex-row items-center justify-start gap-2">
-                                                            {loadingFileIndex === file.id ? <CircularProgress aria-label="progress" className="file" size="sm" color="default" /> : <IconFileFilled size={24} className="file" />}
-                                                            <div className="flex flex-col gap-0 p-0 w-full h-auto">
-                                                                <span className="text-sm font-semibold" style={{ color: '#8A90A7' }}>{file.name}</span>
-                                                                <span className="text-sm font-normal" style={{ color: '#8A90A7' }}>{(file.size / (1024 * 1024)).toFixed(2)} MB</span>
-                                                                {loadingFileIndex === file.id && <Progress aria-label="progress" value={progress} className=" max-h-1 bg-[#8A90A7] rounded" />}
-                                                            </div>
-                                                            {isSaving ? null : <IconBackspaceFilled size={24} className="delete cursor-pointer h-6 " onClick={() => handleFileDelete(file.name)} />}
-                                                        </div>
-                                                    </div>
-                                                ))}
-
-                                                {!isSaving && (
-
-                                                    <div className="border-[#8A90A7] border-dashed border-2 rounded-md w-full h-auto max-h-[54px] flex flex-row items-center justify-center">
-
-                                                        <div className="w-full h-auto max-h-[54px] flex flex-row items-center justify-center">
-                                                            <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-[48px] border-[#8A90A7] rounded-md cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
-                                                                <p className="text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Haz click para cargar un <strong>PDF</strong></span></p>
-                                                                <input id="dropzone-file" type="file" className="hidden" onChange={handleFileUpload} accept="application/pdf" />
-                                                            </label>
-                                                        </div>
-
-                                                    </div>
-
-                                                )}
-                                            </div>
-
-                                        </div>
-                                        <Button isLoading={isSaving} onClick={handleFileSave} className="w-full h-auto flex p-2 text-[#DADCE3] font-semibold text-sm bg-[#31313A] rounded">Guardar Archivos</Button>
-
-                                    </ModalBody>
+                                    </div>
 
                                 </div>
-                            )}
 
-                        </ModalContent>
+                                <div className="w-80 min-w-[310px] flex flex-col gap-2 cursor-default">
 
-                    </Modal>
+                                    <div className="w-full h-11 min-h-[44px] rounded-md bg-white flex items-center justify-center">
 
-                    <ModalInteractive isOpen={isModalOpen} projectName={projectName} onModalData={handleModalData} tipoAnalisis="profundidad" />
+                                        <span className="text-base font-semibold text-[#1F1F21]">Mateo Aponte</span>
 
-                    <Modal
-                        backdrop="opaque"
-                        isOpen={questionsOpen}
-                        onOpenChange={handleQuestionsOpen}
-                        classNames={{
-                            backdrop: "bg-gradient-to-t from-zinc-900 to-zinc-900/10 backdrop-opacity-20"
-                        }}
-                        className="w-full h-auto max-w-[464px] max-h-[600px] rounded-lg"
-                        isDismissable={false}
-                    >
-                        <ModalContent className="w-full h-auto">
-                            {(onClose) => (
-                                <div className="w-full h-full flex flex-col items-center justify-start gap-6 p-6">
-                                    <ModalBody className="w-full h-full flex flex-col items-center justify-start gap-6 p-0">
-                                        <div className="w-full h-full flex flex-col gap-2 cursor-default">
-                                            <span className=" font-bold text-xl text-[#31313A]">Preguntas</span>
+                                    </div>
 
-                                            <div className="questions pr-1 flex flex-col items-start justify-start gap-2 max-h-[192px] overflow-auto">
+                                    <div className="w-full h-full rounded-md bg-white flex flex-col items-start justify-start px-4 py-2 gap-2" style={{ maxHeight: 'calc(100vh - 256px)', overflow: 'auto' }}>
 
-                                                {questions.map((question) => {
-                                                    const sizeInKB = question.size / 1024;
-                                                    const sizeInMB = sizeInKB / 1024;
-                                                    const displaySize = sizeInMB < 1 ? `${sizeInKB.toFixed(2)} KB` : `${sizeInMB.toFixed(2)} MB`;
+                                        <ScrollShadow hideScrollBar>
 
-                                                    return (
-                                                        <div key={question.name} className={`border-2 rounded-md w-full h-auto  flex flex-row px-2 py-1.5 items-center border-[#F29545]`}>
-                                                            <div className="w-full flex flex-row items-center justify-start gap-2">
-                                                                <IconFileFilled size={24} className="file active" />
-                                                                <div className="flex flex-col gap-0 p-0 w-full">
-                                                                    <span className="text-sm font-semibold" style={{ color: '#F29545' }}>{question.name}</span>
-                                                                    <span className="text-sm font-normal" style={{ color: '#F29545' }}>{displaySize}</span>
-                                                                </div>
-                                                                <IconBackspaceFilled size={24} className="delete active cursor-pointer h-6" onClick={() => handleQuestionDelete(question.name)} />
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })}
+                                            <span className="text-base font-semibold text-[#1F1F21] overflow-auto pr-2">
+                                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem.
+                                            </span>
 
-                                            </div>
-                                        </div>
+                                        </ScrollShadow>
 
-                                        <div className="w-full h-full flex flex-col gap-2 cursor-default">
-                                            <span className="w-full font-bold text-xl text-[#31313A]"></span>
+                                    </div>
 
-                                            <div className="pendings pr-1 flex flex-col items-start justify-start gap-2 max-h-[192px] overflow-auto">
-
-                                                {!isSaving && (
-                                                    <div className="border-[#8A90A7] border-dashed border-2 rounded-md w-full h-auto max-h-[54px] flex flex-row items-center justify-center">
-                                                        <div className="w-full h-auto max-h-[54px] flex flex-row items-center justify-center">
-                                                            <label htmlFor="dropzone-question" className="flex flex-col items-center justify-center w-full h-[48px] border-[#8A90A7] rounded-md cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
-                                                                <p className="text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Haz click para cargar un <strong>JSON</strong></span></p>
-                                                                <input id="dropzone-question" type="file" className="hidden" onChange={handleQuestionUpload} accept="application/json" />
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <Button isLoading={isSaving} onClick={handleQuestionSave} className="w-full h-auto flex p-2 text-[#DADCE3] font-semibold text-sm bg-[#31313A] rounded">Guardar Preguntas</Button>
-                                    </ModalBody>
                                 </div>
-                            )}
-                        </ModalContent>
-                    </Modal>
+
+                                <div className="w-80 min-w-[310px] flex flex-col gap-2 cursor-default">
+
+                                    <div className="w-full h-11 min-h-[44px] rounded-md bg-white flex items-center justify-center">
+
+                                        <span className="text-base font-semibold text-[#1F1F21]">Mateo Aponte</span>
+
+                                    </div>
+
+                                    <div className="w-full h-full rounded-md bg-white flex flex-col items-start justify-start px-4 py-2 gap-2" style={{ maxHeight: 'calc(100vh - 256px)', overflow: 'auto' }}>
+
+                                        <ScrollShadow hideScrollBar>
+
+                                            <span className="text-base font-semibold text-[#1F1F21] overflow-auto pr-2">
+                                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem.
+                                            </span>
+
+                                        </ScrollShadow>
+
+                                    </div>
+
+                                </div>
+
+                                <div className="w-80 min-w-[310px] flex flex-col gap-2 cursor-default">
+
+                                    <div className="w-full h-11 min-h-[44px] rounded-md bg-white flex items-center justify-center">
+
+                                        <span className="text-base font-semibold text-[#1F1F21]">Mateo Aponte</span>
+
+                                    </div>
+
+                                    <div className="w-full h-full rounded-md bg-white flex flex-col items-start justify-start px-4 py-2 gap-2" style={{ maxHeight: 'calc(100vh - 256px)', overflow: 'auto' }}>
+
+                                        <ScrollShadow hideScrollBar>
+
+                                            <span className="text-base font-semibold text-[#1F1F21] overflow-auto pr-2">
+                                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed malesuada faucibus ex nec ultricies. Donec mattis egestas nisi non pretium. Suspendisse nec eros ut erat facilisis maximus. In congue et leo in varius. Vestibulum sit amet felis ornare, commodo orci ut, feugiat lorem.
+                                            </span>
+
+                                        </ScrollShadow>
+
+                                    </div>
+
+                                </div>
+
+                            </ScrollShadow>
+
+                        </div>
+
+                    </div>
 
                 </div>
 
-                {isTableFinished ? (
-                    <div className="w-full h-full bg-white flex flex-col gap-5 items-center justify-start rounded-lg border-x-1 border-t-1 border-b-2 border-[#E0E0E0] md:min-w-[300px]">
+            )}
 
-                        <div className="w-full min-h-[56px] rounded-t-lg border-b-2 border-[#EFF0F3] flex flex-row px-5 py-1 items-center justify-between cursor-default">
+            <Modal
+                isOpen={filesOpen}
+                onOpenChange={toggleFilesOpen}
+                placement="top-center"
+                classNames={{
+                    backdrop: "bg-gradient-to-t from-zinc-900 to-zinc-900/10 backdrop-opacity-20"
+                }}
+                className='border-1 border-[#89898A] min-w-[600px] flex flex-col items-center justify-start gap-6 rounded-lg p-4'
+            >
+                <ModalContent>
+                    {(onClose) => (
+                        <>
 
-                            <span className=" text-base font-bold text-[#131315]">Tabla generada automáticamente</span>
+                            <ModalBody className='w-full p-0'>
 
-                            <IconMaximize size={20} className="cursor-pointer" />
+                                <div className="flex flex-col items-start justify-start gap-2">
+
+                                    <span className="text-base font-bold text-[#1F1F21]">Archivos</span>
+                                    {files?.map((file: FileWithId) => {
+                                        return (
+                                            <div key={file.name} className={`border-2 rounded-md w-full h-auto max-h-[60px] flex flex-row px-2 py-1.5 items-center border-[#1F1F21]`}>
+                                                <div className="w-full flex flex-row items-center justify-start gap-2">
+                                                    <IconFileFilled size={24} className="file" />
+                                                    <div className="flex flex-col gap-0 p-0 w-full h-auto">
+                                                        <span className="text-sm font-semibold" style={{ color: '#1F1F21' }}>{file.name}</span>
+                                                        <span className="text-sm font-normal" style={{ color: '#1F1F21' }}>{file.size} MB</span>
+                                                    </div>
+                                                    {isSaving ? null : <IconBackspaceFilled size={24} className="delete cursor-pointer h-6 text-[#E7E7E8]" onClick={() => handleFileDelete(file.name)} />}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+
+                                </div>
+
+                                <Divider orientation="horizontal" className="bg-[#E7E7E8] w-full h-[2px]" />
+
+                                <div className="flex flex-col items-start justify-start gap-2">
+
+                                    {newFiles.map((file: FileWithId) => {
+                                        return (
+                                            <div key={file.id} className={`border-2 rounded-md w-full h-auto max-h-[60px] flex flex-row px-2 py-1.5 items-center border-[#E7E7E8]`}>
+                                                <div className="w-full flex flex-row items-center justify-start gap-2">
+                                                    {loadingFileIndex === file.id ? <CircularProgress aria-label="progress" className="file" size="sm" color="default" /> : <IconFileFilled size={24} className="file text-[#E7E7E8]" />}
+                                                    <div className="flex flex-col gap-0 p-0 w-full h-auto">
+                                                        <span className="text-sm font-semibold" style={{ color: '#89898A' }}>{file.name}</span>
+                                                        <span className="text-sm font-normal" style={{ color: '#89898A' }}>{(file.size / (1024 * 1024)).toFixed(2)} MB</span>
+                                                        {loadingFileIndex === file.id && <Progress aria-label="progress" value={progress} className=" max-h-1 bg-[#E7E7E8] rounded" />}
+                                                    </div>
+                                                    {isSaving ? null : <IconBackspaceFilled size={24} className="delete cursor-pointer h-6 text-[#E7E7E8]" onClick={() => handleFileDelete(file.name)} />}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+
+                                </div>
+
+                                <div className="w-full h-auto max-h-[54px] flex flex-row items-center justify-center">
+                                    <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-[48px] border-[#000] rounded-md cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                                        <p className="text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Haz click para cargar un <strong>PDF</strong></span></p>
+                                        <input id="dropzone-file" type="file" onChange={handleFileUpload} className="hidden" accept="application/pdf" ref={fileInputRef} />
+                                    </label>
+                                </div>
+
+                            </ModalBody>
+
+                            <ModalFooter className='p-0 w-full min-h-[36px]'>
+                                <Button className='bg-[#1F1F21] rounded-md w-full min-h-[36px] text-white font-semibold text-base' onClick={handleFileSave}>
+                                    Agregar Archivos
+                                </Button>
+                            </ModalFooter>
+
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
+
+            {questionsOpen && (
+
+                <div className="w-full max-w-[1280px] h-screen flex flex-row gap-5 items-center justify-center" style={{ maxHeight: 'calc(100vh - 56px)' }}>
+
+                    <div className="border-1 border-[#89898A] w-8/12 h-auto min-h-[556px] max-h-[708px] bg-white rounded-md flex flex-col items-start justify-start gap-4 p-4">
+
+                        <div className="w-full h-auto flex flex-row items-center justify-between">
+
+                            <span className="text-base font-bold text-[#1F1F21] cursor-default">Vista previa de las preguntas del proyecto</span>
+
+                            <Button className="bg-[#1F1F21] min-w-[80px] h-[36px] flex items-center justify-center text-md font-semibold text-[#E7E7E8] rounded-md flex-row gap-1" onClick={handleSaveQuestions}>Guardar</Button>
 
                         </div>
 
-                        <div className="w-full h-full px-5 pb-5 gap-2 flex flex-col">
+                        <ScrollShadow hideScrollBar className='w-full flex flex-col gap-2' style={{ maxHeight: 'calc(100vh - 256px)' }}>
 
-                            <div className="w-full min-h-[32px] max-h-[32px] flex flex-row p-2 items-center justify-between cursor-default">
-
-                                <span className=" text-base font-bold text-[#F29545]" onClick={handleExportToExcel}>Tabla Completa</span>
-
-                                <Select aria-label="Selector" className="max-w-xs max-h-8 overflow-hidden flex flex-col items-center justify-center">
-                                    <SelectItem key={1} >Empty</SelectItem>
-                                </Select>
-
-                            </div>
-
-                            <div className="w-full h-[calc(100%-40px)] box-border border-1 border-[#E0E0E0] rounded-md flex flex-row items-start justify-start">
-
-                                <div className="questions w-1/3 h-full rounded-s-lg flex flex-col items-start justify-start gap-2 p-2 max-h-[488px] overflow-auto" dir="rtl">
-
-                                    {entrevistaData?.map((preguntaData, index) => (
-                                        <div
-                                            key={index}
-                                            className={`w-full h-auto flex flex-col items-start justify-start p-4 gap-2 rounded-md cursor-pointer hover:font-semibold duration-200 ${preguntaData === preguntaSeleccionada ? 'bg-[#F9CAA2]' : 'hover:bg-[#FDEBDC]'} ${preguntaData === preguntaSeleccionada ? ' font-semibold' : ' font-normal'}`}
-                                            onClick={() => setPreguntaSeleccionada(preguntaData)}
-                                            dir="ltr"
-                                        >
-                                            <span>{preguntaData?.title}</span>
-                                        </div>
-                                    ))}
-
+                            {questions.length > 0 && questions.map((question, index) => (
+                                <div key={index} className="border-1 border-[#89898A] h-auto w-full flex flex-row items-start justify-between p-3 rounded-md">
+                                    <span className=" text-sm font-semibold text-[#1F1F21]">{question}</span>
+                                    <IconBackspaceFilled size={18} className="text-[#E7E7E8] hover:text-[#1F1F21] cursor-pointer" onClick={() => handleQuestionDelete(index)} />
                                 </div>
+                            ))}
 
-                                <div className="w-2/3 h-full min-h-[488px] bg-[#EFF0F3] rounded-e-lg flex flex-row p-2 items-start justify-start overflow-x-auto">
+                        </ScrollShadow>
 
-                                    {preguntaSeleccionada && preguntaSeleccionada?.respuestas?.map((respuesta, index) => (
-                                        <div key={index} className="w-full min-h-[36px] flex flex-col items-start justify-start rounded-md bg-[#EFF0F3] cursor-default h-full gap-2 p-2">
-                                            <div className="w-full min-w-[256px] h-full max-h-[36px] flex items-center justify-center rounded-md px-3 py-2 bg-white cursor-default">
-                                                <span className=" text-base font-medium text-[#131315]">{respuesta.name}</span>
-                                            </div>
-                                            <div className="answer overflow-y-auto w-full h-full max-h-[420px] p-4 bg-white rounded-lg flex items-start">
-                                                <div className="h-full mt-3 px-2">
-                                                    {respuesta.respuesta && respuesta?.respuesta.split('.').filter(sentence => sentence.trim() !== '').map((sentence, index) => (
-                                                        <React.Fragment key={index}>
-                                                            <p className=" text-base font-normal text-[#131315]">{sentence + '.'}</p>
-                                                            {index !== respuesta?.respuesta.split('.').length - 2 && <br />}
-                                                        </React.Fragment>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
+                    </div>
 
-                                </div>
+                    <div className="border-1 border-[#89898A] w-4/12 h-full min-h-[556px] max-h-[556px] bg-white rounded-md flex flex-col items-start justify-start" style={{ maxHeight: 'calc(100vh - 256px)' }}>
 
-                            </div>
+                        <div className="w-full h-[52px] min-h-[52px] flex flex-row items-center justify-between p-4">
+
+                            <span className="text-base font-bold text-[#1F1F21]">Agregar preguntas</span>
+
+                            <IconX size={20} onClick={handleQuestions} className="cursor-pointer" />
+
+                        </div>
+
+                        <div className="w-full h-full flex flex-col items-start justify-start gap-4 p-4">
+
+                            <p>{inputValue.split('\n').map((line, index) => (
+                                <span key={index}>
+                                    {line}
+                                    <br />
+                                </span>
+                            ))}</p>
+
+                        </div>
+
+                        <div className="w-full h-[64px] min-h-[64px] flex flex-row items-center justify-between border-t-1 border-[#89898A] gap-2 pr-3">
+
+                            <textarea className="w-full h-full p-4 rounded-md" value={inputValue} onChange={handleInputChange} />
+
+                            <Button className="w-auto h-auto flex items-center justify-center bg-[#1F1F21] rounded p-2 cursor-pointer" onClick={handleButtonClick}>
+                                <IconSend size={20} className="text-[#E7E7E8]" />
+                            </Button>
 
                         </div>
 
                     </div>
 
-                ) : null}
+                </div>
 
-            </div>
+            )}
 
         </div>
 
@@ -904,3 +584,12 @@ export default function Chat() {
     );
 
 }
+
+
+
+
+
+
+
+
+{/* <ChatModule hover={hover} setHover={setHover} handleSendClick={handleSendClick} inputValue={inputValue} handleMessageChange={handleMessageChange} /> */ }
