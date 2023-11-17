@@ -45,7 +45,7 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
             setVisible(true);
             setProgress(10);
             setArchivoActual("Analizando Información");
-            setModalText(`Analizando ${archivoActual}`);
+            // setModalText(`Analizando ${archivoActual}`);
             console.log(projectName)
 
             const fetchProjectNames = async () => {
