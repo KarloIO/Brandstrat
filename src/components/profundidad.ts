@@ -10,10 +10,15 @@ import { BufferWindowMemory } from "langchain/memory";
 import pdfParse from 'pdf-parse';
 import { encode } from 'gpt-tokenizer';
 import { PromptTemplate } from 'langchain/prompts'
+const path = require('path');
 
 export default async function Profundidad(projectName: string, fileName: string) {
 
-    `${process.cwd()}/test/data/05-versions-space.pdf`
+    const relativePath = './test/data/05-versions-space.pdf';
+
+    const absolutePath = path.resolve(relativePath);
+
+    console.log(absolutePath);
 
     const project = (projectName).toString();
     let respuestas: { [key: string]: { name: string, respuesta: string }[] } = {};
@@ -122,13 +127,13 @@ export default async function Profundidad(projectName: string, fileName: string)
                     console.log(`------ Procesando pregunta: ${pregunta} ------`);
                     const preguntaPersonalizada = `${pregunta}. If you don't have an immediate answer, please re-analyze the documents and provide an answer based on similar bases to the question. The answers should be in the first person, as if the interviewee were answering the interview question. Always respond in Spanish.`;
                     const response = await chain.call({ query: preguntaPersonalizada })
-                
+
                     if (!respuestas[pregunta]) {
                         respuestas[pregunta] = [];
                     }
-                
+
                     respuestas[pregunta].push({ name: eName, respuesta: response.text });
-                
+
                     const tokens = encode(response.text);
                     totalTokens += tokens.length;
                 }
