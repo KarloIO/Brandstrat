@@ -45,7 +45,7 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
             setVisible(true);
             setProgress(10);
             setArchivoActual("Analizando Información");
-            // setModalText(`Analizando ${archivoActual}`);
+            setModalText(`Analizando ${archivoActual}`);
 
             const fetchProjectNames = async () => {
                 try {
@@ -105,9 +105,8 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
                     onModalData('Error al obtener nombres de proyectos')
                 };
 
-                fetchProjectNames();
             }
-
+            fetchProjectNames();
         } else {
             console.log('nada')
         }
