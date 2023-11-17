@@ -288,7 +288,7 @@ export default function Chat() {
 
             </div>
 
-            <ModalInteractive isOpen={isModalOpen} projectName={projectId} onModalData={handleModalData} tipoAnalisis={getTipoAnalisis(project?.type)} />
+            {isModalOpen && <ModalInteractive isOpen={isModalOpen} projectName={projectId} onModalData={handleModalData} tipoAnalisis={getTipoAnalisis(project?.type)} />}
             {/* <ModalInteractive isOpen={isModalOpen} projectName={projectId} onModalData={handleModalData} tipoAnalisis={'grupales'} /> */}
 
             {table && (
