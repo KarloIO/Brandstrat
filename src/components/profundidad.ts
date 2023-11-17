@@ -10,10 +10,10 @@ import { BufferWindowMemory } from "langchain/memory";
 import pdfParse from 'pdf-parse';
 import { encode } from 'gpt-tokenizer';
 import { PromptTemplate } from 'langchain/prompts'
-const path = require('path') 
 
 export default async function Profundidad(projectName: string, fileName: string) {
-    console.log(path);
+
+    `${process.cwd()}/test/data/05-versions-space.pdf`
 
     const project = (projectName).toString();
     let respuestas: { [key: string]: { name: string, respuesta: string }[] } = {};

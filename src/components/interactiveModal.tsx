@@ -15,6 +15,7 @@ interface ModalInteractiveProps {
 }
 
 export default function ModalInteractive({ isOpen, projectName, onModalData, tipoAnalisis }: ModalInteractiveProps) {
+    `${process.cwd()}/test/data/05-versions-space.pdf`
     const [visible, setVisible] = useState(isOpen);
     const [progress, setProgress] = useState(0);
     const [archivoActual, setArchivoActual] = useState("");
