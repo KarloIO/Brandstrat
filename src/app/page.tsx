@@ -198,7 +198,7 @@ export default function Home() {
 
                         <div className='w-auto h-full flex flex-row gap-1 cursor-default'>
 
-                          {project.type === 'Grupal' ? <IconUsersGroup size={18} className='text-[#89898A] stroke-[3]' /> : <IconUser size={18} className='text-[#89898A] stroke-[3]' />}
+                          {project.type === 'grupales' ? <span className=' text-sm font-semibold text-[#89898A]'>Grupal</span> : <IconUser size={18} className='text-[#89898A] stroke-[3]' />}
 
                           <span className=' text-sm font-semibold text-[#89898A]'>{project.type}</span>
 
