@@ -6,6 +6,8 @@ import Profundidad from '@/components/profundidad';
 import Grupales from '@/components/grupales';
 
 import supabaseClient from '@/lib/supabase';
+export const maxDuration = 300;
+export const dynamic = 'force-dynamic';
 
 interface ModalInteractiveProps {
     isOpen: boolean;
