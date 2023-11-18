@@ -72,12 +72,12 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
                             const funcionAnalisis = tipoAnalisis === 'grupales' ? Grupales : (tipoAnalisis === 'profundidad' ? Profundidad : undefined);
 
                             if (funcionAnalisis) {
-                                await funcionAnalisis(projectName, archivo.name).then(respuestasRecibidas => {
-                                    for (let pregunta in respuestasRecibidas) {
-                                        agregarRespuesta(pregunta, respuestasRecibidas[pregunta]);
-                                    }
+                                const respuestasRecibidas = await funcionAnalisis(projectName, archivo.name);
+                                for (let pregunta in respuestasRecibidas) {
+                                    agregarRespuesta(pregunta, respuestasRecibidas[pregunta]);
                                     setProgress((index + 1) / totalFiles * 100);
-                                });
+                                    onModalData(respuestas);
+                                }
                             } else {
                                 console.error('funcionAnalisis es undefined');
                                 setModalText('Error: funcionAnalisis es undefined');
