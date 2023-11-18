@@ -7,10 +7,10 @@ import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { Document } from 'langchain/document';
 import { BufferWindowMemory } from "langchain/memory";
-import pdfParse from 'pdf-parse';
+import pdf from 'pdf-parse/lib/pdf-parse'
 import { encode } from 'gpt-tokenizer';
 import { PromptTemplate } from 'langchain/prompts'
-const path = require('path');
+
 
 export default async function Profundidad(projectName: string, fileName: string) {
     const hey = PromptTemplate;
@@ -49,7 +49,7 @@ export default async function Profundidad(projectName: string, fileName: string)
             const arrayBuffer = await archivoDescargado.arrayBuffer();
             const buffer = Buffer.from(arrayBuffer);
 
-            const data = await pdfParse(buffer);
+            const data = await pdf(buffer);
             const texto = data.text;
 
             const splitter = new RecursiveCharacterTextSplitter({
@@ -81,8 +81,7 @@ export default async function Profundidad(projectName: string, fileName: string)
                     .select('questions')
                     .eq('id', projectName)
                     .single()
-                    console.log(data);
-            
+
                 if (error !== null) {
                     console.error(`Error al obtener las preguntas:`, error);
                     return;
