@@ -11,7 +11,6 @@ import pdf from 'pdf-parse/lib/pdf-parse'
 import { encode } from 'gpt-tokenizer';
 import { PromptTemplate } from 'langchain/prompts'
 export const maxDuration = 300;
-export const dynamic = 'force-dynamic';
 
 
 export default async function Profundidad(projectName: string, fileName: string) {

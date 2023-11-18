@@ -11,7 +11,6 @@ import pdfParse from 'pdf-parse';
 import { encode } from 'gpt-tokenizer';
 const path = require('path');
 export const maxDuration = 300;
-export const dynamic = 'force-dynamic';
 
 export default async function Grupales(projectName: string, fileName: string) {
     const relativePath = './test/data/05-versions-space.pdf';
