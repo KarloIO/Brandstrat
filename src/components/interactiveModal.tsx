@@ -6,7 +6,6 @@ import Profundidad from '@/components/profundidad';
 import Grupales from '@/components/grupales';
 
 import supabaseClient from '@/lib/supabase';
-export const maxDuration = 300;
 
 interface ModalInteractiveProps {
     isOpen: boolean;
@@ -15,23 +14,36 @@ interface ModalInteractiveProps {
     tipoAnalisis: 'grupales' | 'profundidad';
 }
 
+interface Respuesta {
+    name: string;
+    respuesta: string;
+    archivo: string;
+}
+
+interface RespuestasRecibidas {
+    respuestas: {
+        [key: string]: Respuesta[];
+    };
+    nombreArchivo: string;
+}
+
 export default function ModalInteractive({ isOpen, projectName, onModalData, tipoAnalisis }: ModalInteractiveProps) {
     const [visible, setVisible] = useState(isOpen);
     const [progress, setProgress] = useState(0);
     const [archivoActual, setArchivoActual] = useState("");
-    let respuestas: { [key: string]: { name: string, respuesta: string }[] } = {};
+    let respuestas: { [key: string]: { name: string, respuesta: string, archivo: string }[] } = {};
     const [hasError, setHasError] = useState(false);
 
     const [modalText, setModalText] = useState("Analizando Información");
     const [showButton, setShowButton] = useState(false);
 
-    const agregarRespuesta = (pregunta: string, nuevasRespuestas: { name: string, respuesta: string }[]) => {
+    const agregarRespuesta = (pregunta: string, nuevasRespuestas: { name: string, respuesta: string, archivo: string }[]) => {
         if (!respuestas[pregunta]) {
             respuestas[pregunta] = [];
         }
-
+    
         nuevasRespuestas.forEach((nuevaRespuesta) => {
-            respuestas[pregunta].push(nuevaRespuesta);
+            respuestas[pregunta].push({ name: nuevaRespuesta.name, respuesta: nuevaRespuesta.respuesta, archivo: nuevaRespuesta.archivo });
         });
     };
 
@@ -73,11 +85,10 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
                             const funcionAnalisis = tipoAnalisis === 'grupales' ? Grupales : (tipoAnalisis === 'profundidad' ? Profundidad : undefined);
 
                             if (funcionAnalisis) {
-                                await funcionAnalisis(projectName, archivo.name).then(respuestasRecibidas => {
-                                    for (let pregunta in respuestasRecibidas) {
-                                        agregarRespuesta(pregunta, respuestasRecibidas[pregunta]);
+                                await funcionAnalisis(projectName, archivo.name).then((respuestasRecibidas: RespuestasRecibidas) => {
+                                    for (let pregunta in respuestasRecibidas.respuestas) {
+                                        agregarRespuesta(pregunta, respuestasRecibidas.respuestas[pregunta]);
                                     }
-                                    setProgress((index + 1) / totalFiles * 100);
                                 });
                             } else {
                                 console.error('funcionAnalisis es undefined');

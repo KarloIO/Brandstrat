@@ -19,7 +19,7 @@ export default async function Grupales(projectName: string, fileName: string) {
     console.log(absolutePath);
 
     const project = (projectName).toString();
-    let respuestas: { [key: string]: { name: string, respuesta: string }[] } = {};
+    let respuestas: { [key: string]: { name: string, respuesta: string, archivo: string }[] } = {};
     let totalTokens = 0;
 
     async function procesarArchivo(nombreArchivo: string) {
@@ -101,7 +101,7 @@ export default async function Grupales(projectName: string, fileName: string) {
                         respuestas[pregunta] = [];
                     }
 
-                    respuestas[pregunta].push({ name: nombreArchivo, respuesta: response.text });
+                    respuestas[pregunta].push({ name: nombreArchivo, respuesta: response.text, archivo: nombreArchivo });
 
                     const tokens = encode(response.text);
                     totalTokens += tokens.length;
@@ -128,5 +128,5 @@ export default async function Grupales(projectName: string, fileName: string) {
 
     console.log(`Total de tokens utilizados: ${totalTokens}`);
 
-    return respuestas;
+    return { respuestas, nombreArchivo: fileName as string };
 }
