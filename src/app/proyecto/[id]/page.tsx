@@ -1,29 +1,13 @@
 'use client';
-import { Avatar, Divider, Tooltip, Select, SelectItem, Progress, Modal, ModalContent, ModalBody, Button, CircularProgress, Dropdown, DropdownTrigger, DropdownItem, DropdownMenu, ScrollShadow, ModalFooter, ModalHeader } from "@nextui-org/react";
+import { Divider, Tooltip,Progress, Modal, ModalContent, ModalBody, Button, CircularProgress, Dropdown, DropdownTrigger, DropdownItem, DropdownMenu, ScrollShadow, ModalFooter } from "@nextui-org/react";
 import { useRouter, usePathname } from "next/navigation";
-import CheckSession from '@/lib/checkSession'
 import supabaseClient from '@/lib/supabase'
 import '@/styles/chat.css'
 import { IconArrowNarrowLeft, IconLink, IconColumns, IconFileFilled, IconBackspaceFilled, IconMenu2, IconTrash, IconFiles, IconQuestionMark, IconUsersGroup, IconX, IconSend } from '@tabler/icons-react';
 import ModalInteractive from '@/components/interactiveModal';
 import { useCallback, useEffect, useRef, useState } from "react";
 import { utils, writeFile } from 'xlsx';
-
-// const ChatModule: React.FC<ChatModuleProps> = ({ hover, setHover, handleSendClick, inputValue, handleMessageChange }) => {
-
-//     return (
-//         <div className="w-[640px] h-auto rounded-lg bg-white p-3 flex justify-between border-x-1 border-t-1 border-b-2 border-[#E0E0E0]">
-//             <div className="w-4/5 h-full max-h-5 flex flex-row gap-2">
-//                 <IconWand size={20} />
-//                 <input type="text" value={inputValue} placeholder="Haz una consulta..." onChange={handleMessageChange} className="bg-white w-full border-white focus:outline-none text-md font-medium text-[#8A90A7] placeholder:text-[#8A90A7]" />
-//             </div>
-//             <div className="w-auto h-full max-h-5 flex flex-row gap-1 items-center cursor-pointer ease-in-out duration-200" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onClick={() => handleSendClick(inputValue)}>
-//                 <IconArrowForward size={20} className={hover ? "fill-current text-[#F29545] filter brightness-0 saturate-100% hue-rotate(360deg) invert(46%) sepia(86%) saturate(1146%) hue-rotate(356deg) brightness(101%) contrast(87%) duration-200" : "duration-200 fill-current"} />
-//                 <span className={hover ? "font-semibold text-sm text-black duration-200" : "font-semibold text-sm text-[#8A90A7] duration-200"}>Enviar</span>
-//             </div>
-//         </div>
-//     );
-// };
+import ChatModal from '@/components/chatModal'
 
 interface Project {
     description: string;
@@ -53,7 +37,7 @@ interface FileWithId extends File {
 export default function Chat() {
     const router = useRouter();
     const pathname = usePathname();
-    const projectId = pathname.split("/")[2];
+    const projectId = pathname!.split("/")[2];
     const [project, setProject] = useState<Project | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [table, isTableFinished] = useState(false);
@@ -254,7 +238,7 @@ export default function Chat() {
     const exportExcel = () => {
         const workbook = utils.book_new();
         let formattedData: ({ Pregunta?: string; Nombre?: string; Respuesta?: string })[] = [];
-    
+
         Object.keys(tableData).forEach((question) => {
             formattedData.push({ Pregunta: question });
             const data = tableData[question];
@@ -266,10 +250,10 @@ export default function Chat() {
             });
             formattedData.push({});
         });
-    
+
         const worksheet = utils.json_to_sheet(formattedData, { skipHeader: true });
         utils.book_append_sheet(workbook, worksheet, "Resultados");
-    
+
         const date = new Date();
         const dateStr = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
         writeFile(workbook, `report_${dateStr}.xlsx`);
@@ -282,6 +266,8 @@ export default function Chat() {
             <div className="w-full h-14 min-h-[56px] bg-white border-b-1 border-[#89898A] flex flex-row items-center justify-between px-8">
 
                 <Button className="bg-[#1F1F21] min-w-[80px] h-[36px] flex items-center justify-center text-md font-semibold text-[#E7E7E8] rounded-md flex-row gap-1" onClick={() => router.push('/')}> <IconArrowNarrowLeft size={20} /> Regresar</Button>
+
+                <ChatModal />
 
                 <div className="w-auto h-10 flex flex-row items-center justify-end gap-4">
 
@@ -319,7 +305,6 @@ export default function Chat() {
             </div>
 
             <ModalInteractive isOpen={isModalOpen} projectName={projectId} onModalData={handleModalData} tipoAnalisis={getTipoAnalisis(project?.type)} />
-            {/* <ModalInteractive isOpen={isModalOpen} projectName={projectId} onModalData={handleModalData} tipoAnalisis={'grupales'} /> */}
 
             {table && (
 
@@ -520,16 +505,6 @@ export default function Chat() {
 
         </div>
 
-
     );
 
 }
-
-
-
-
-
-
-
-
-{/* <ChatModule hover={hover} setHover={setHover} handleSendClick={handleSendClick} inputValue={inputValue} handleMessageChange={handleMessageChange} /> */ }
