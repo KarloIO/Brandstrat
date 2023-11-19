@@ -16,7 +16,7 @@ export default async function Profundidad(projectName: string, fileName: string)
     const hey = PromptTemplate;
 
     const project = (projectName).toString();
-    let respuestas: { [key: string]: { name: string, respuesta: string, archivo: string }[] } = {};
+    let respuestas: { [key: string]: { name: string, respuesta: string }[] } = {};
     let totalTokens = 0;
 
     async function procesarArchivo(nombreArchivo: string) {
@@ -104,7 +104,7 @@ export default async function Profundidad(projectName: string, fileName: string)
                         respuestas[pregunta] = [];
                     }
 
-                    respuestas[pregunta].push({ name: eName, respuesta: response.text, archivo: nombreArchivo });
+                    respuestas[pregunta].push({ name: eName, respuesta: response.text });
 
                     const tokens = encode(response.text);
                     totalTokens += tokens.length;
@@ -112,9 +112,7 @@ export default async function Profundidad(projectName: string, fileName: string)
 
                 console.log(`------ Terminado con el archivo: ${nombreArchivo}. Comenzando con el siguiente archivo ------`);
 
-                // await vectorStore.delete()
-
-
+                await vectorStore.delete()
 
                 return nombreArchivo;
 
@@ -133,5 +131,5 @@ export default async function Profundidad(projectName: string, fileName: string)
 
     console.log(`Total de tokens utilizados: ${totalTokens}`);
 
-    return { respuestas, nombreArchivo: fileName as string };
+    return respuestas;
 }

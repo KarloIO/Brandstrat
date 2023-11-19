@@ -14,36 +14,23 @@ interface ModalInteractiveProps {
     tipoAnalisis: 'grupales' | 'profundidad';
 }
 
-interface Respuesta {
-    name: string;
-    respuesta: string;
-    archivo: string;
-}
-
-interface RespuestasRecibidas {
-    respuestas: {
-        [key: string]: Respuesta[];
-    };
-    nombreArchivo: string;
-}
-
 export default function ModalInteractive({ isOpen, projectName, onModalData, tipoAnalisis }: ModalInteractiveProps) {
     const [visible, setVisible] = useState(isOpen);
     const [progress, setProgress] = useState(0);
     const [archivoActual, setArchivoActual] = useState("");
-    let respuestas: { [key: string]: { name: string, respuesta: string, archivo: string }[] } = {};
+    let respuestas: { [key: string]: { name: string, respuesta: string, nombreArchivo?: string }[] } = {};
     const [hasError, setHasError] = useState(false);
 
     const [modalText, setModalText] = useState("Analizando Información");
     const [showButton, setShowButton] = useState(false);
 
-    const agregarRespuesta = (pregunta: string, nuevasRespuestas: { name: string, respuesta: string, archivo: string }[]) => {
+    const agregarRespuesta = (nombreArchivo: string, pregunta: string, nuevasRespuestas: { name: string, respuesta: string }[]) => {
         if (!respuestas[pregunta]) {
             respuestas[pregunta] = [];
         }
     
         nuevasRespuestas.forEach((nuevaRespuesta) => {
-            respuestas[pregunta].push({ name: nuevaRespuesta.name, respuesta: nuevaRespuesta.respuesta, archivo: nuevaRespuesta.archivo });
+            respuestas[pregunta].push({ ...nuevaRespuesta, nombreArchivo });
         });
     };
 
@@ -85,11 +72,12 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
                             const funcionAnalisis = tipoAnalisis === 'grupales' ? Grupales : (tipoAnalisis === 'profundidad' ? Profundidad : undefined);
 
                             if (funcionAnalisis) {
-                                await funcionAnalisis(projectName, archivo.name).then((respuestasRecibidas: RespuestasRecibidas) => {
-                                    for (let pregunta in respuestasRecibidas.respuestas) {
-                                        agregarRespuesta(pregunta, respuestasRecibidas.respuestas[pregunta]);
+                                await funcionAnalisis(projectName, archivo.name).then(respuestasRecibidas => {
+                                    for (let pregunta in respuestasRecibidas) {
+                                        agregarRespuesta(archivo.name, pregunta, respuestasRecibidas[pregunta]);
                                     }
-                                });
+                                    setProgress((index + 1) / totalFiles * 100);
+                                }); 
                             } else {
                                 console.error('funcionAnalisis es undefined');
                                 setModalText('Error: funcionAnalisis es undefined');
@@ -97,6 +85,7 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
                                 setHasError(true);
                             }
                         }
+                        console.log(respuestas);
                         onModalData(respuestas);
                         setModalText('Análisis completo')
                         setShowButton(true)

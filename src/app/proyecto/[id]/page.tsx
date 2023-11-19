@@ -69,7 +69,8 @@ export default function Chat() {
     const [questionsOpen, setQuestionsOpen] = useState(false)
     const [inputValue, setInputValue] = useState('');
     const [questions, setQuestions] = useState<string[]>([]);
-    let tableRows: { name: string; file: string; responses: { [key: string]: string } }[] = [];
+    const [tableData, setTableData] = useState<any>([]);
+    const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
 
     const fetchData = useCallback(async () => {
         const { data, error } = await supabaseClient
@@ -90,23 +91,11 @@ export default function Chat() {
     }
 
     const handleModalData = (data: any) => {
-
-        for (let question in data) {
-            data[question].forEach((response: any, index: number) => {
-                if (!tableRows[index]) {
-                    tableRows[index] = {
-                        name: response.name,
-                        file: response.archivo,
-                        responses: {}
-                    };
-                }
-
-                tableRows[index].responses[question] = response.respuesta;
-            });
-        }
-
-        console.log(tableRows);
+        setTableData(data);
+        isTableFinished(true);
     }
+
+    console.log(tableData);
 
     function getTipoAnalisis(type: string | undefined): "grupales" | "profundidad" {
         const lowerCaseType = type?.toLowerCase();
@@ -261,6 +250,10 @@ export default function Chat() {
         console.log(questions);
     }
 
+    const handleQuestionClick = (question: string) => {
+        setSelectedQuestion(question);
+    };
+
     return (
 
         <div className="w-screen h-auto flex flex-col items-center justify-start">
@@ -307,23 +300,54 @@ export default function Chat() {
             <ModalInteractive isOpen={isModalOpen} projectName={projectId} onModalData={handleModalData} tipoAnalisis={getTipoAnalisis(project?.type)} />
             {/* <ModalInteractive isOpen={isModalOpen} projectName={projectId} onModalData={handleModalData} tipoAnalisis={'grupales'} /> */}
 
-            {tableRows.map((row, index) => (
-                <div key={index} className="w-80 min-w-[310px] flex flex-col gap-2 cursor-default">
-                    <div className="w-full h-11 min-h-[44px] rounded-md bg-white flex items-center justify-center">
-                        <span className="text-base font-semibold text-[#1F1F21]">{row.name}</span>
-                    </div>
-                    <div className="w-full h-full rounded-md bg-white flex flex-col items-start justify-start px-4 py-2 gap-2" style={{ maxHeight: 'calc(100vh - 256px)', overflow: 'auto' }}>
-                        <ScrollShadow hideScrollBar>
-                            {Object.entries(row.responses).map(([question, answer]) => (
-                                <div key={question}>
-                                    <span className="text-base font-semibold text-[#1F1F21]">{question}</span>
-                                    <span className="text-base font-semibold text-[#1F1F21] overflow-auto pr-2">{answer}</span>
+            {table && (
+
+                <div className="w-full h-screen flex flex-col items-center justify-start pt-10 pb-[156px] gap-12 px-[80px] max-w-[1440px]" style={{ maxHeight: 'calc(100vh - 56px)' }}>
+
+                    <span className='descriptions id max-w-[800px] h-full min-h-[24px]' style={{ display: '-webkit-box', WebkitLineClamp: '1', WebkitBoxOrient: 'vertical', overflow: 'hidden', height: '24px' }}>
+                        {project?.description || 'Cargando Proyecto'}
+                    </span>
+
+                    <div className="w-full h-full flex flex-row items-start justify-start gap-5">
+
+                        <div className="border-[#1F1F21] border-2 w-1/4 h-full rounded-lg flex flex-col gap-2 p-2 overflow-hidden">
+
+                            <ScrollShadow hideScrollBar className='flex flex-col gap-2' >
+
+                                {Object.keys(tableData).map((pregunta, index) => (
+                                    <div key={index} className="border-2 border-[#1F1F21] w-full h-auto bg-white flex flex-row items-center justify-start px-3 py-4 gap-2 rounded-md" onClick={() => handleQuestionClick(pregunta)}>
+                                        <span className="w-full text-base font-bold text-[#1F1F21] cursor-default">{pregunta}</span>
+                                    </div>
+                                ))}
+
+                            </ScrollShadow>
+
+                        </div>
+
+                        <div className="w-3/4 h-full flex flex-row gap-2">
+
+                            {selectedQuestion && tableData[selectedQuestion].map((respuesta: any, index: any) => (
+                                <div key={index} className="w-80 min-w-[310px] flex flex-col gap-2 cursor-default">
+                                    <div className="w-full h-11 min-h-[44px] rounded-md bg-white flex items-center justify-center">
+                                        <span className="text-base font-semibold text-[#1F1F21]">{respuesta.name}</span>
+                                    </div>
+                                    <div className="w-full h-full rounded-md bg-white flex flex-col items-start justify-start px-4 py-2 gap-2" style={{ maxHeight: 'calc(100vh - 256px)', overflow: 'auto' }}>
+                                        <ScrollShadow hideScrollBar>
+                                            <span className="text-base font-semibold text-[#1F1F21] overflow-auto pr-2">
+                                                {respuesta.respuesta}
+                                            </span>
+                                        </ScrollShadow>
+                                    </div>
                                 </div>
                             ))}
-                        </ScrollShadow>
+
+                        </div>
+
                     </div>
+
                 </div>
-            ))}
+
+            )}
 
             <Modal
                 isOpen={filesOpen}
