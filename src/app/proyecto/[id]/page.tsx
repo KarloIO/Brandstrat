@@ -4,11 +4,10 @@ import { useRouter, usePathname } from "next/navigation";
 import CheckSession from '@/lib/checkSession'
 import supabaseClient from '@/lib/supabase'
 import '@/styles/chat.css'
-
-import { IconWand, IconArrowForward, IconArrowNarrowLeft, IconLink, IconColumns, IconFileFilled, IconBackspaceFilled, IconMaximize, IconMenu2, IconTrash, IconFiles, IconQuestionMark, IconUsersGroup, IconX, IconSend } from '@tabler/icons-react';
-
+import { IconArrowNarrowLeft, IconLink, IconColumns, IconFileFilled, IconBackspaceFilled, IconMenu2, IconTrash, IconFiles, IconQuestionMark, IconUsersGroup, IconX, IconSend } from '@tabler/icons-react';
 import ModalInteractive from '@/components/interactiveModal';
 import { useCallback, useEffect, useRef, useState } from "react";
+import { utils, writeFile } from 'xlsx';
 
 // const ChatModule: React.FC<ChatModuleProps> = ({ hover, setHover, handleSendClick, inputValue, handleMessageChange }) => {
 
@@ -94,8 +93,6 @@ export default function Chat() {
         setTableData(data);
         isTableFinished(true);
     }
-
-    console.log(tableData);
 
     function getTipoAnalisis(type: string | undefined): "grupales" | "profundidad" {
         const lowerCaseType = type?.toLowerCase();
@@ -254,6 +251,30 @@ export default function Chat() {
         setSelectedQuestion(question);
     };
 
+    const exportExcel = () => {
+        const workbook = utils.book_new();
+        let formattedData: ({ Pregunta?: string; Nombre?: string; Respuesta?: string })[] = [];
+    
+        Object.keys(tableData).forEach((question) => {
+            formattedData.push({ Pregunta: question });
+            const data = tableData[question];
+            data.forEach((respuesta: { name: string; respuesta: string }) => {
+                formattedData.push({
+                    Nombre: respuesta.name,
+                    Respuesta: respuesta.respuesta
+                });
+            });
+            formattedData.push({});
+        });
+    
+        const worksheet = utils.json_to_sheet(formattedData, { skipHeader: true });
+        utils.book_append_sheet(workbook, worksheet, "Resultados");
+    
+        const date = new Date();
+        const dateStr = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+        writeFile(workbook, `report_${dateStr}.xlsx`);
+    };
+
     return (
 
         <div className="w-screen h-auto flex flex-col items-center justify-start">
@@ -287,7 +308,7 @@ export default function Chat() {
                         <DropdownMenu aria-label='menu'>
                             <DropdownItem aria-label='files' key='files' startContent={<IconFiles />} className="custom-dropdown-item rounded" onClick={() => handleFiles(projectId)}>Archivos</DropdownItem>
                             <DropdownItem aria-label='questions' key='questions' startContent={<IconQuestionMark />} className="custom-dropdown-item rounded" onClick={() => handleQuestions()}>Preguntas</DropdownItem>
-                            <DropdownItem isDisabled={!table} aria-label='table' key='table' startContent={<IconColumns />} className="custom-dropdown-item rounded" >Descargar Tabla</DropdownItem>
+                            <DropdownItem isDisabled={!table} aria-label='table' key='table' startContent={<IconColumns />} className="custom-dropdown-item rounded" onClick={exportExcel}>Descargar Tabla</DropdownItem>
                             <DropdownItem aria-label='access' key='access' startContent={<IconUsersGroup />} className="custom-dropdown-item rounded">Accesos</DropdownItem>
                             <DropdownItem aria-label='delete' key='delete' startContent={<IconTrash />} className="custom-dropdown-item rounded" >Eliminar</DropdownItem>
                         </DropdownMenu>
@@ -315,8 +336,12 @@ export default function Chat() {
                             <ScrollShadow hideScrollBar className='flex flex-col gap-2' >
 
                                 {Object.keys(tableData).map((pregunta, index) => (
-                                    <div key={index} className="border-2 border-[#1F1F21] w-full h-auto bg-white flex flex-row items-center justify-start px-3 py-4 gap-2 rounded-md" onClick={() => handleQuestionClick(pregunta)}>
-                                        <span className="w-full text-base font-bold text-[#1F1F21] cursor-default">{pregunta}</span>
+                                    <div
+                                        key={index}
+                                        className={`border-2 border-[#1F1F21] w-full h-auto flex flex-row items-center justify-start px-3 py-4 gap-2 rounded-md ${pregunta === selectedQuestion ? 'bg-[#1F1F21]' : 'bg-white'} cursor-pointer`}
+                                        onClick={() => handleQuestionClick(pregunta)}
+                                    >
+                                        <span className={`w-full text-base font-bold cursor-pointer ${pregunta === selectedQuestion ? 'text-white' : 'text-[#1F1F21]'}`}>{pregunta}</span>
                                     </div>
                                 ))}
 
@@ -326,20 +351,23 @@ export default function Chat() {
 
                         <div className="w-3/4 h-full flex flex-row gap-2">
 
-                            {selectedQuestion && tableData[selectedQuestion].map((respuesta: any, index: any) => (
-                                <div key={index} className="w-80 min-w-[310px] flex flex-col gap-2 cursor-default">
-                                    <div className="w-full h-11 min-h-[44px] rounded-md bg-white flex items-center justify-center">
-                                        <span className="text-base font-semibold text-[#1F1F21]">{respuesta.name}</span>
+                            <ScrollShadow orientation="horizontal" className="horizontal flex flex-row gap-2" >
+                                {selectedQuestion && tableData[selectedQuestion].map((respuesta: any, index: any) => (
+                                    <div key={index} className="w-80 min-w-[310px] flex flex-col gap-2 cursor-default">
+                                        <div className="w-full h-11 min-h-[44px] rounded-md bg-white flex items-center justify-center">
+                                            <span className="text-base font-semibold text-[#1F1F21]">{respuesta.name}</span>
+                                        </div>
+                                        <div className="w-full h-full rounded-md bg-white flex flex-col items-start justify-start px-4 py-2 gap-2" style={{ maxHeight: 'calc(100vh - 256px)', overflow: 'auto' }}>
+                                            <ScrollShadow hideScrollBar>
+                                                <span className="text-base font-semibold text-[#1F1F21] overflow-auto pr-2">
+                                                    {respuesta.respuesta}
+                                                </span>
+                                            </ScrollShadow>
+                                        </div>
                                     </div>
-                                    <div className="w-full h-full rounded-md bg-white flex flex-col items-start justify-start px-4 py-2 gap-2" style={{ maxHeight: 'calc(100vh - 256px)', overflow: 'auto' }}>
-                                        <ScrollShadow hideScrollBar>
-                                            <span className="text-base font-semibold text-[#1F1F21] overflow-auto pr-2">
-                                                {respuesta.respuesta}
-                                            </span>
-                                        </ScrollShadow>
-                                    </div>
-                                </div>
-                            ))}
+
+                                ))}
+                            </ScrollShadow>
 
                         </div>
 
