@@ -1,5 +1,6 @@
 'use server';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { buffer } from 'micro';
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import supabaseClient from '@/lib/supabase'
 import { OpenAI } from "langchain/llms/openai";
@@ -11,18 +12,23 @@ import { BufferWindowMemory } from "langchain/memory";
 import pdf from 'pdf-parse/lib/pdf-parse'
 import { encode } from 'gpt-tokenizer';
 import { PromptTemplate } from 'langchain/prompts'
+import { NextResponse } from 'next/server';
 
 
-export default async function Profundidad(req: NextApiRequest, res: NextApiResponse) {
+export const POST = async function (req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== 'POST') {
-        res.status(405).send({ message: 'Solo se permiten solicitudes POST' });
-        return;
+        return
     }
+
+    let data = '';
+    for await (const chunk of req.body) {
+        data += chunk;
+    }
+    const text = String.fromCharCode(...data.split(',').map(Number));
+    const { projectName, fileName } = JSON.parse(text);
     const hey = PromptTemplate;
 
-    console.log(req.body)
-
-    const { projectName, fileName } = req.body;
+    console.log(`projectName: ${projectName}, fileName: ${fileName}`);
 
     const project = (projectName).toString();
     let respuestas: { [key: string]: { name: string, respuesta: string }[] } = {};
@@ -122,8 +128,6 @@ export default async function Profundidad(req: NextApiRequest, res: NextApiRespo
 
                 console.log(`------ Terminado con el archivo: ${nombreArchivo}. Comenzando con el siguiente archivo ------`);
 
-                await vectorStore.delete()
-
                 return nombreArchivo;
 
             } catch (error) {
@@ -141,5 +145,5 @@ export default async function Profundidad(req: NextApiRequest, res: NextApiRespo
 
     console.log(`Total de tokens utilizados: ${totalTokens}`);
 
-    res.status(200).json(respuestas);
+    return res.status(200).json(respuestas);
 }
