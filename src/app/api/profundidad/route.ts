@@ -17,6 +17,8 @@ interface RequestBody {
     fileName: string;
 }
 
+export const maxDuration = 300;
+
 export const POST = async function (req: NextRequest, res: NextResponse) {
     if (req.method !== 'POST') {
         return

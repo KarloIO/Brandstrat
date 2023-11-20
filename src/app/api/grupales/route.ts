@@ -16,6 +16,8 @@ interface RequestBody {
     fileName: string;
 }
 
+export const maxDuration = 300;
+
 export const POST = async function (req: NextRequest, res: NextResponse) {
     if (req.method !== 'POST') {
         return
@@ -116,8 +118,6 @@ export const POST = async function (req: NextRequest, res: NextResponse) {
                 }
 
                 console.log(`------ Terminado con el archivo: ${nombreArchivo}. Comenzando con el siguiente archivo ------`);
-
-                await vectorStore.delete()
 
                 return nombreArchivo;
 
