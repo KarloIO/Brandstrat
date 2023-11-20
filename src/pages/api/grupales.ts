@@ -1,4 +1,5 @@
 'use server';
+import { NextApiRequest, NextApiResponse } from 'next';
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import supabaseClient from '@/lib/supabase'
 import { OpenAI } from "langchain/llms/openai";
@@ -10,7 +11,13 @@ import { BufferWindowMemory } from "langchain/memory";
 import pdf from 'pdf-parse/lib/pdf-parse'
 import { encode } from 'gpt-tokenizer';
 
-export default async function Grupales(projectName: string, fileName: string) {
+export default async function Grupales(req: NextApiRequest, res: NextApiResponse) {
+    if (req.method !== 'POST') {
+        res.status(405).send({ message: 'Solo se permiten solicitudes POST' });
+        return;
+    }
+
+    const { projectName, fileName } = req.body;
 
     const project = (projectName).toString();
     let respuestas: { [key: string]: { name: string, respuesta: string }[] } = {};
@@ -125,5 +132,5 @@ export default async function Grupales(projectName: string, fileName: string) {
 
     console.log(`Total de tokens utilizados: ${totalTokens}`);
 
-    return respuestas;
+    res.status(200).json(respuestas);
 }
