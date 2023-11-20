@@ -18,6 +18,7 @@ export default async function Profundidad(projectName: string, fileName: string)
     const project = (projectName).toString();
     let respuestas: { [key: string]: { name: string, respuesta: string }[] } = {};
     let totalTokens = 0;
+    console.log(totalTokens);
 
     async function procesarArchivo(nombreArchivo: string) {
         try {
