@@ -14,12 +14,18 @@ interface ModalInteractiveProps {
     tipoAnalisis: 'grupales' | 'profundidad';
 }
 
+interface Question {
+    id: number;
+    text: string;
+}
+
 export default function ModalInteractive({ isOpen, projectName, onModalData, tipoAnalisis }: ModalInteractiveProps) {
     const [visible, setVisible] = useState(isOpen);
     const [progress, setProgress] = useState(0);
     const [archivoActual, setArchivoActual] = useState("");
     let respuestas: { [key: string]: { name: string, respuesta: string, nombreArchivo?: string }[] } = {};
     const [hasError, setHasError] = useState(false);
+    const [questions, setQuestions] = useState<Question[] | undefined>();
 
     const [modalText, setModalText] = useState("Analizando Información");
     const [showButton, setShowButton] = useState(false);
@@ -33,6 +39,29 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
             respuestas[pregunta].push({ ...nuevaRespuesta, nombreArchivo });
         });
     };
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const { data, error } = await supabaseClient
+                .from('proyectos')
+                .select('*')
+                .eq('id', projectName)
+                .single();
+
+            if (error) {
+                console.error('Error al obtener las preguntas:', error);
+            } else if (data && data.questions) {
+                const questionsObjects = data.questions.map((question: any, index: any) => ({
+                    id: index,
+                    text: question,
+                }));
+
+                setQuestions(questionsObjects);
+            }
+        };
+
+        fetchData();
+    }, [projectName]);
 
     useEffect(() => {
         if (isOpen && projectName) {
@@ -68,57 +97,65 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
                             const archivo = filteredData[index];
                             setArchivoActual(`Analizando ${archivo.name}`);
                             setModalText(`Analizando ${archivo.name}`);
-
-                            const funcionAnalisis = async (projectName: string, fileName: string) => {
-                                if (tipoAnalisis === 'grupales') {
-                                    const response = await fetch('/api/grupales', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                        },
-                                        body: JSON.stringify({
-                                            projectName: projectName,
-                                            fileName: fileName,
-                                        }),
-                                    });
-                            
-                                    if (!response.ok) {
-                                        throw new Error('Error en la solicitud HTTP');
+                    
+                            if (questions) {
+                                for (let questionIndex = 0; questionIndex < questions.length; questionIndex++) {
+                                    const question = questions[questionIndex];
+                    
+                                    const funcionAnalisis = async (projectName: string, fileName: string, question: string) => {
+                                        if (tipoAnalisis === 'grupales') {
+                                            const response = await fetch('/api/grupales', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                },
+                                                body: JSON.stringify({
+                                                    projectName: projectName,
+                                                    fileName: fileName,
+                                                    question: question,
+                                                }),
+                                            });
+                    
+                                            if (!response.ok) {
+                                                throw new Error('Error en la solicitud HTTP');
+                                            }
+                    
+                                            return await response.json();
+                                        } else if (tipoAnalisis === 'profundidad') {
+                                            const response = await fetch('/api/profundidad', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                },
+                                                body: JSON.stringify({
+                                                    projectName: projectName,
+                                                    fileName: fileName,
+                                                    question: question,
+                                                }),
+                                            });
+                    
+                                            if (!response.ok) {
+                                                throw new Error('Error en la solicitud HTTP');
+                                            }
+                    
+                                            return await response.json();
+                                        }
+                                    };
+                    
+                                    if (funcionAnalisis) {
+                                        await funcionAnalisis(projectName, archivo.name, question.text).then(respuestasRecibidas => {
+                                            for (let pregunta in respuestasRecibidas) {
+                                                agregarRespuesta(archivo.name, pregunta, respuestasRecibidas[pregunta]);
+                                            }
+                                            setProgress((index + 1) / totalFiles * 100);
+                                        });
+                                    } else {
+                                        console.error('funcionAnalisis es undefined');
+                                        setModalText('Error: funcionAnalisis es undefined');
+                                        setShowButton(true);
+                                        setHasError(true);
                                     }
-                            
-                                    return await response.json();
-                                } else if (tipoAnalisis === 'profundidad') {
-                                    const response = await fetch('/api/profundidad', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                        },
-                                        body: JSON.stringify({
-                                            projectName: projectName,
-                                            fileName: fileName,
-                                        }),
-                                    });
-                            
-                                    if (!response.ok) {
-                                        throw new Error('Error en la solicitud HTTP');
-                                    }
-                            
-                                    return await response.json();
                                 }
-                            };
-
-                            if (funcionAnalisis) {
-                                await funcionAnalisis(projectName, archivo.name).then(respuestasRecibidas => {
-                                    for (let pregunta in respuestasRecibidas) {
-                                        agregarRespuesta(archivo.name, pregunta, respuestasRecibidas[pregunta]);
-                                    }
-                                    setProgress((index + 1) / totalFiles * 100);
-                                });
-                            } else {
-                                console.error('funcionAnalisis es undefined');
-                                setModalText('Error: funcionAnalisis es undefined');
-                                setShowButton(true);
-                                setHasError(true);
                             }
                         }
                         console.log(respuestas);

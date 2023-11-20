@@ -1,5 +1,5 @@
 'use client';
-import { Divider, Tooltip,Progress, Modal, ModalContent, ModalBody, Button, CircularProgress, Dropdown, DropdownTrigger, DropdownItem, DropdownMenu, ScrollShadow, ModalFooter } from "@nextui-org/react";
+import { Divider, Tooltip, Progress, Modal, ModalContent, ModalBody, Button, CircularProgress, Dropdown, DropdownTrigger, DropdownItem, DropdownMenu, ScrollShadow, ModalFooter } from "@nextui-org/react";
 import { useRouter, usePathname } from "next/navigation";
 import supabaseClient from '@/lib/supabase'
 import '@/styles/chat.css'
@@ -62,7 +62,8 @@ export default function Chat() {
             .eq('id', projectId)
             .single()
         setProject(data);
-        setFiles(data?.files)
+        setFiles(data?.files);
+        setQuestions(data.questions);
     }, [projectId]);
 
     useEffect(() => {
@@ -200,12 +201,9 @@ export default function Chat() {
         });
     }
 
-    const toggleQuestionsOpen = () => {
-        setQuestionsOpen(prevState => !prevState);
-    };
-
     const handleQuestions = () => {
         setQuestionsOpen(!questionsOpen);
+        isTableFinished(!table);
     }
 
     const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -306,7 +304,7 @@ export default function Chat() {
 
             <ModalInteractive isOpen={isModalOpen} projectName={projectId} onModalData={handleModalData} tipoAnalisis={getTipoAnalisis(project?.type)} />
 
-            {table && (
+            {table && Object.keys(tableData).length > 0 && (
 
                 <div className="w-full h-screen flex flex-col items-center justify-start pt-10 pb-[156px] gap-12 px-[80px] max-w-[1440px]" style={{ maxHeight: 'calc(100vh - 56px)' }}>
 

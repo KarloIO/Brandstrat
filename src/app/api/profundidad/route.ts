@@ -14,6 +14,7 @@ import { NextRequest, NextResponse } from 'next/server';
 interface RequestBody {
     projectName: string;
     fileName: string;
+    question: string;
 }
 
 export const maxDuration = 300;
@@ -24,7 +25,8 @@ export const POST = async function (req: NextRequest, res: NextResponse) {
         return
     }
 
-    const { projectName, fileName } = await req.json() as RequestBody;
+    const { projectName, fileName, question } = await req.json() as RequestBody;
+
 
     const project = (projectName).toString();
     let respuestas: { [key: string]: { name: string, respuesta: string }[] } = {};
@@ -74,7 +76,8 @@ export const POST = async function (req: NextRequest, res: NextResponse) {
             ])
 
             const model = new OpenAI({
-                modelName: "gpt-4-1106-preview",
+                // modelName: "gpt-4-1106-preview",
+                modelName: "gpt-3.5-turbo-1106",
                 temperature: 0.0,
             });
 
@@ -105,22 +108,19 @@ export const POST = async function (req: NextRequest, res: NextResponse) {
                 console.log('Nombre obtenido:', nombreRespuesta);
                 const eName = nombreRespuesta.text;
 
-                const preguntas = data.questions;
 
-                for (const pregunta of preguntas) {
-                    console.log(`------ Procesando pregunta: ${pregunta} ------`);
-                    const preguntaPersonalizada = `${pregunta}. If you don't have an immediate answer, please re-analyze the documents and provide an answer based on similar bases to the question. The answers should be in the first person, as if the interviewee were answering the interview question. Always respond in Spanish.`;
-                    const response = await chain.call({ query: preguntaPersonalizada })
-
-                    if (!respuestas[pregunta]) {
-                        respuestas[pregunta] = [];
-                    }
-
-                    respuestas[pregunta].push({ name: eName, respuesta: response.text });
-
-                    const tokens = encode(response.text);
-                    totalTokens += tokens.length;
+                console.log(`------ Procesando pregunta: ${question} ------`);
+                const preguntaPersonalizada = `${question}. Si no tienes una respuesta inmediata, por favor re-analiza los documentos y proporciona una respuesta basada en bases similares a la pregunta. Las respuestas deben estar en primera persona, como si el entrevistado estuviera respondiendo a la pregunta de la entrevista. Siempre responde en español.`;
+                const response = await chain.call({ query: preguntaPersonalizada })
+                
+                if (!respuestas[question]) {
+                    respuestas[question] = [];
                 }
+                
+                respuestas[question].push({ name: eName, respuesta: response.text });
+                
+                const tokens = encode(response.text);
+                totalTokens += tokens.length;
 
                 console.log(`------ Terminado con el archivo: ${nombreArchivo}. Comenzando con el siguiente archivo ------`);
 
