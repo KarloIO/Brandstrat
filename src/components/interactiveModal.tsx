@@ -2,8 +2,8 @@
 import { useState, useEffect } from 'react';
 import { Modal, Progress, ModalContent, ModalBody, ModalHeader, Button } from '@nextui-org/react';
 
-import Profundidad from '@/components/profundidad';
-import Grupales from '@/components/grupales';
+// import Profundidad from '@/components/pf';
+// import Grupales from '@/components/gp';
 
 import supabaseClient from '@/lib/supabase';
 
