@@ -7,14 +7,10 @@ import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { Document } from 'langchain/document';
 import { BufferWindowMemory } from "langchain/memory";
-import pdfParse from 'pdf-parse';
+import pdf from 'pdf-parse/lib/pdf-parse'
 import { encode } from 'gpt-tokenizer';
-const path = require('path');
 
 export default async function Grupales(projectName: string, fileName: string) {
-    const relativePath = './test/data/05-versions-space.pdf';
-
-    const absolutePath = path.resolve(relativePath);
 
     const project = (projectName).toString();
     let respuestas: { [key: string]: { name: string, respuesta: string }[] } = {};
@@ -51,7 +47,7 @@ export default async function Grupales(projectName: string, fileName: string) {
             const arrayBuffer = await archivoDescargado.arrayBuffer();
             const buffer = Buffer.from(arrayBuffer);
 
-            const data = await pdfParse(buffer);
+            const data = await pdf(buffer);
             const texto = data.text;
 
             const splitter = new RecursiveCharacterTextSplitter({
@@ -95,7 +91,7 @@ export default async function Grupales(projectName: string, fileName: string) {
 
                 for (const { pregunta } of preguntasFiltradas) {
                     console.log(`------ Procesando pregunta: ${pregunta} ------`);
-                    const preguntaGeneral = `${pregunta}. Please provide a summary based on the document content. Always respond in Spanish.`;
+                    const preguntaGeneral = `${pregunta}. Please provide a summary based on the document content. Always respond in Spanish. not more than 500 characters`;
                     const response = await chain.call({ query: preguntaGeneral })
 
                     if (!respuestas[pregunta]) {

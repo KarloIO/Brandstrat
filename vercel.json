@@ -1,0 +1,10 @@
+{
+    "functions": {
+        "src/components/grupales.ts": {
+            "maxDuration": 300
+        },
+        "src/components/profundidad.ts": {
+            "maxDuration": 300
+        }
+    }
+}
