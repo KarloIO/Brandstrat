@@ -1,9 +1,6 @@
 {
     "functions": {
-        "api/grupales.ts": {
-            "maxDuration": 300
-        },
-        "api/profundidad.ts": {
+        "app/api/**/*": {
             "maxDuration": 300
         }
     }
