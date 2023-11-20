@@ -1,9 +1,9 @@
 {
     "functions": {
-        "src/components/grupales.ts": {
+        "api/grupales.ts": {
             "maxDuration": 300
         },
-        "src/components/profundidad.ts": {
+        "api/profundidad.ts": {
             "maxDuration": 300
         }
     }

@@ -10,22 +10,27 @@ import { Document } from 'langchain/document';
 import { BufferWindowMemory } from "langchain/memory";
 import pdf from 'pdf-parse/lib/pdf-parse'
 import { encode } from 'gpt-tokenizer';
+import { PromptTemplate } from 'langchain/prompts'
 
-export default async function Grupales(req: NextApiRequest, res: NextApiResponse) {
+
+export default async function Profundidad(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== 'POST') {
         res.status(405).send({ message: 'Solo se permiten solicitudes POST' });
         return;
     }
+    const hey = PromptTemplate;
+
+    console.log(req.body)
 
     const { projectName, fileName } = req.body;
 
     const project = (projectName).toString();
     let respuestas: { [key: string]: { name: string, respuesta: string }[] } = {};
     let totalTokens = 0;
+    console.log(totalTokens);
 
     async function procesarArchivo(nombreArchivo: string) {
         try {
-            console.log(nombreArchivo);
 
             console.log(`Trabajando con el archivo: ${nombreArchivo}`);
             let intentos = 0;
@@ -71,7 +76,7 @@ export default async function Grupales(req: NextApiRequest, res: NextApiResponse
                 temperature: 0.0,
             });
 
-            const memory = new BufferWindowMemory({ k: 2 })
+            const memory = new BufferWindowMemory({ k: 12 })
 
             const vectorStore = await MemoryVectorStore.fromDocuments(
                 chunks,
@@ -92,20 +97,24 @@ export default async function Grupales(req: NextApiRequest, res: NextApiResponse
                     return;
                 }
 
-                const preguntasFiltradas = data.questions.map((p: string) => ({ pregunta: p }));
+                console.log(`------ Obteniendo el nombre del entrevistado ------`);
+                const nombreQuery = `¿Cuál es el nombre del entrevistado? Solo dame el primer nombre sin texto extra. Responde siempre en español.`;
+                const nombreRespuesta = await chain.call({ query: nombreQuery })
+                console.log('Nombre obtenido:', nombreRespuesta);
+                const eName = nombreRespuesta.text;
 
-                console.log(preguntasFiltradas);
+                const preguntas = data.questions;
 
-                for (const { pregunta } of preguntasFiltradas) {
+                for (const pregunta of preguntas) {
                     console.log(`------ Procesando pregunta: ${pregunta} ------`);
-                    const preguntaGeneral = `${pregunta}. Please provide a summary based on the document content. Always respond in Spanish. not more than 500 characters`;
-                    const response = await chain.call({ query: preguntaGeneral })
+                    const preguntaPersonalizada = `${pregunta}. If you don't have an immediate answer, please re-analyze the documents and provide an answer based on similar bases to the question. The answers should be in the first person, as if the interviewee were answering the interview question. Always respond in Spanish.`;
+                    const response = await chain.call({ query: preguntaPersonalizada })
 
                     if (!respuestas[pregunta]) {
                         respuestas[pregunta] = [];
                     }
 
-                    respuestas[pregunta].push({ name: nombreArchivo, respuesta: response.text });
+                    respuestas[pregunta].push({ name: eName, respuesta: response.text });
 
                     const tokens = encode(response.text);
                     totalTokens += tokens.length;

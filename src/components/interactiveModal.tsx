@@ -28,7 +28,7 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
         if (!respuestas[pregunta]) {
             respuestas[pregunta] = [];
         }
-    
+
         nuevasRespuestas.forEach((nuevaRespuesta) => {
             respuestas[pregunta].push({ ...nuevaRespuesta, nombreArchivo });
         });
@@ -69,7 +69,43 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
                             setArchivoActual(`Analizando ${archivo.name}`);
                             setModalText(`Analizando ${archivo.name}`);
 
-                            const funcionAnalisis = tipoAnalisis === 'grupales' ? Grupales : (tipoAnalisis === 'profundidad' ? Profundidad : undefined);
+                            const funcionAnalisis = async (projectName: string, fileName: string) => {
+                                if (tipoAnalisis === 'grupales') {
+                                    const response = await fetch('/api/grupales', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify({
+                                            projectName: projectName,
+                                            fileName: fileName,
+                                        }),
+                                    });
+                            
+                                    if (!response.ok) {
+                                        throw new Error('Error en la solicitud HTTP');
+                                    }
+                            
+                                    return await response.json();
+                                } else if (tipoAnalisis === 'profundidad') {
+                                    const response = await fetch('/api/profundidad', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify({
+                                            projectName: projectName,
+                                            fileName: fileName,
+                                        }),
+                                    });
+                            
+                                    if (!response.ok) {
+                                        throw new Error('Error en la solicitud HTTP');
+                                    }
+                            
+                                    return await response.json();
+                                }
+                            };
 
                             if (funcionAnalisis) {
                                 await funcionAnalisis(projectName, archivo.name).then(respuestasRecibidas => {
@@ -77,7 +113,7 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
                                         agregarRespuesta(archivo.name, pregunta, respuestasRecibidas[pregunta]);
                                     }
                                     setProgress((index + 1) / totalFiles * 100);
-                                }); 
+                                });
                             } else {
                                 console.error('funcionAnalisis es undefined');
                                 setModalText('Error: funcionAnalisis es undefined');
