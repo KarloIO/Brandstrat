@@ -145,5 +145,5 @@ export const POST = async function (req: NextApiRequest, res: NextApiResponse) {
 
     console.log(`Total de tokens utilizados: ${totalTokens}`);
 
-    return res.status(200).json(respuestas);
+    return NextResponse.json(respuestas);
 }
