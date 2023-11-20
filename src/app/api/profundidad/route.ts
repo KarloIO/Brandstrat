@@ -1,4 +1,3 @@
-'use server';
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import supabaseClient from '@/lib/supabase'
 import { OpenAI } from "langchain/llms/openai";
@@ -18,6 +17,7 @@ interface RequestBody {
 }
 
 export const maxDuration = 300;
+export const dynamic = 'force-dynamic';
 
 export const POST = async function (req: NextRequest, res: NextResponse) {
     if (req.method !== 'POST') {

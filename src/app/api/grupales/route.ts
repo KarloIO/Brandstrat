@@ -1,4 +1,3 @@
-'use server';
 import { NextRequest, NextResponse } from 'next/server';
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import supabaseClient from '@/lib/supabase'
@@ -17,6 +16,7 @@ interface RequestBody {
 }
 
 export const maxDuration = 300;
+export const dynamic = 'force-dynamic';
 
 export const POST = async function (req: NextRequest, res: NextResponse) {
     if (req.method !== 'POST') {
