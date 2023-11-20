@@ -1,5 +1,5 @@
 'use server';
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import supabaseClient from '@/lib/supabase'
 import { OpenAI } from "langchain/llms/openai";
@@ -10,19 +10,18 @@ import { Document } from 'langchain/document';
 import { BufferWindowMemory } from "langchain/memory";
 import pdf from 'pdf-parse/lib/pdf-parse'
 import { encode } from 'gpt-tokenizer';
-import { NextResponse } from 'next/server';
 
-export const POST = async function (req: NextApiRequest, res: NextApiResponse) {
+interface RequestBody {
+    projectName: string;
+    fileName: string;
+}
+
+export const POST = async function (req: NextRequest, res: NextResponse) {
     if (req.method !== 'POST') {
         return
     }
 
-    let data = '';
-    for await (const chunk of req.body) {
-        data += chunk;
-    }
-    const text = String.fromCharCode(...data.split(',').map(Number));
-    const { projectName, fileName } = JSON.parse(text);
+    const { projectName, fileName } = await req.json() as RequestBody;
 
     const project = (projectName).toString();
     let respuestas: { [key: string]: { name: string, respuesta: string }[] } = {};
