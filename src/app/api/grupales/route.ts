@@ -10,14 +10,19 @@ import { Document } from 'langchain/document';
 import { BufferWindowMemory } from "langchain/memory";
 import pdf from 'pdf-parse/lib/pdf-parse'
 import { encode } from 'gpt-tokenizer';
+import { NextResponse } from 'next/server';
 
-export default async function Grupales(req: NextApiRequest, res: NextApiResponse) {
+export const POST = async function (req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== 'POST') {
-        res.status(405).send({ message: 'Solo se permiten solicitudes POST' });
-        return;
+        return
     }
 
-    const { projectName, fileName } = req.body;
+    let data = '';
+    for await (const chunk of req.body) {
+        data += chunk;
+    }
+    const text = String.fromCharCode(...data.split(',').map(Number));
+    const { projectName, fileName } = JSON.parse(text);
 
     const project = (projectName).toString();
     let respuestas: { [key: string]: { name: string, respuesta: string }[] } = {};
@@ -132,5 +137,5 @@ export default async function Grupales(req: NextApiRequest, res: NextApiResponse
 
     console.log(`Total de tokens utilizados: ${totalTokens}`);
 
-    res.status(200).json(respuestas);
+    return NextResponse.json(respuestas);
 }

@@ -28,8 +28,6 @@ export const POST = async function (req: NextApiRequest, res: NextApiResponse) {
     const { projectName, fileName } = JSON.parse(text);
     const hey = PromptTemplate;
 
-    console.log(`projectName: ${projectName}, fileName: ${fileName}`);
-
     const project = (projectName).toString();
     let respuestas: { [key: string]: { name: string, respuesta: string }[] } = {};
     let totalTokens = 0;
