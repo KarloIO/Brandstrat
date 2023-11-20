@@ -16,8 +16,6 @@ export default async function Grupales(projectName: string, fileName: string) {
 
     const absolutePath = path.resolve(relativePath);
 
-    console.log(absolutePath);
-
     const project = (projectName).toString();
     let respuestas: { [key: string]: { name: string, respuesta: string }[] } = {};
     let totalTokens = 0;
@@ -83,6 +81,7 @@ export default async function Grupales(projectName: string, fileName: string) {
                 const { data, error } = await supabaseClient
                     .from('proyectos')
                     .select('questions')
+                    .eq('id', projectName)
                     .single()
 
                 if (error !== null) {
@@ -91,6 +90,8 @@ export default async function Grupales(projectName: string, fileName: string) {
                 }
 
                 const preguntasFiltradas = data.questions.map((p: string) => ({ pregunta: p }));
+
+                console.log(preguntasFiltradas);
 
                 for (const { pregunta } of preguntasFiltradas) {
                     console.log(`------ Procesando pregunta: ${pregunta} ------`);
