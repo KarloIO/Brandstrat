@@ -8,6 +8,7 @@ import ModalInteractive from '@/components/interactiveModal';
 import { useCallback, useEffect, useRef, useState } from "react";
 import { utils, writeFile } from 'xlsx';
 import ChatModal from '@/components/chatModal'
+import { Toaster, toast } from 'sonner'
 
 interface Project {
     description: string;
@@ -141,64 +142,86 @@ export default function Chat() {
     const handleFileSave = async () => {
         setIsSaving(true);
         const filesToSave = newFiles.filter(file => !completedFiles.includes(file.id));
-        filesToSave.forEach(async (file: any, index) => {
-            setTimeout(async () => {
-                setLoadingFileIndex(file.id);
-                setProgress(0);
-                console.log(`Guardando archivo: ${file.name}`);
-                const { data, error } = await supabaseClient.storage.listBuckets()
-                if (error) {
-                    console.error('Error al listar los buckets:', error)
-                } else {
-                    const bucketExists = data.some(bucket => bucket.id === projectId)
-                    if (!bucketExists) {
-                        const { data, error } = await supabaseClient.storage.createBucket(projectId, {
-                            public: true,
-                        })
-                        if (error) {
-                            console.error('Error al crear el bucket:', error)
-                        } else {
-                            console.log('Bucket creado con éxito:', data)
+        const saveFilesPromise = Promise.all(filesToSave.map(async (file: any, index) => {
+            return new Promise((resolve, reject) => {
+                setTimeout(async () => {
+                    setLoadingFileIndex(file.id);
+                    setProgress(0);
+                    console.log(`Guardando archivo: ${file.name}`);
+                    const { data, error } = await supabaseClient.storage.listBuckets()
+                    if (error) {
+                        console.error('Error al listar los buckets:', error)
+                        reject(error);
+                    } else {
+                        const bucketExists = data.some(bucket => bucket.id === projectId)
+                        if (!bucketExists) {
+                            const { data, error } = await supabaseClient.storage.createBucket(projectId, {
+                                public: true,
+                            })
+                            if (error) {
+                                console.error('Error al crear el bucket:', error)
+                                reject(error);
+                            } else {
+                                console.log('Bucket creado con éxito:', data)
+                            }
                         }
                     }
-                }
-                const filePath = file.name;
-                console.log(filePath);
-                const { data: uploadData, error: uploadError } = await supabaseClient
-                    .storage
-                    .from(projectId)
-                    .upload(filePath, file)
-                if (uploadError) {
-                    console.error('Hubo un error subiendo el archivo:', uploadError);
-                } else {
-                    const { data, error } = await supabaseClient
+                    const filePath = file.name;
+                    console.log(filePath);
+                    const { data: uploadData, error: uploadError } = await supabaseClient
                         .storage
                         .from(projectId)
-                        .createSignedUrl(uploadData.path, 7889400)
-                    console.log(data)
-                    const fileUrl = data?.signedUrl || '';
-                    console.log('Archivo subido con éxito:', uploadData);
-                    if (file.id === filesToSave[filesToSave.length - 1].id) {
-                        setIsSaving(false);
-                        await updateProjectFiles(filesToSave, fileUrl);
-                    }
-                }
-                const intervalId = setInterval(() => {
-                    setProgress(oldProgress => {
-                        if (oldProgress >= 100) {
-                            clearInterval(intervalId);
-                            setCompletedFiles(oldArray => [...oldArray, file.id]);
-                            if (file.id === filesToSave[filesToSave.length - 1].id) {
-                                setIsSaving(false);
-                            }
-                            setLoadingFileIndex(null);
-                            return 100;
+                        .upload(filePath, file)
+                    if (uploadError) {
+                        console.error('Hubo un error subiendo el archivo:', uploadError);
+                        reject(uploadError);
+                    } else {
+                        const { data, error } = await supabaseClient
+                            .storage
+                            .from(projectId)
+                            .createSignedUrl(uploadData.path, 7889400)
+                        console.log(data)
+                        const fileUrl = data?.signedUrl || '';
+                        console.log('Archivo subido con éxito:', uploadData);
+                        if (file.id === filesToSave[filesToSave.length - 1].id) {
+                            setIsSaving(false);
+                            await updateProjectFiles(filesToSave, fileUrl);
                         }
-                        return oldProgress + 10;
-                    });
-                }, 600);
-            }, index * 3000);
-        });
+                        resolve(uploadData);
+                    }
+                    const intervalId = setInterval(() => {
+                        setProgress(oldProgress => {
+                            if (oldProgress >= 100) {
+                                clearInterval(intervalId);
+                                setCompletedFiles(oldArray => [...oldArray, file.id]);
+                                if (file.id === filesToSave[filesToSave.length - 1].id) {
+                                    setIsSaving(false);
+                                }
+                                setLoadingFileIndex(null);
+                                return 100;
+                            }
+                            return oldProgress + 10;
+                        });
+                    }, 600);
+                }, index * 3000);
+            });
+        }));
+
+        toast.promise(
+            saveFilesPromise,
+            {
+                loading: 'Guardando archivos...',
+                success: 'Archivos guardados con éxito',
+                error: 'Error al guardar archivos'
+            }
+        );
+
+        try {
+            const results = await saveFilesPromise;
+            console.log(results);
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     const handleQuestions = () => {
@@ -220,11 +243,25 @@ export default function Chat() {
     }
 
     const handleSaveQuestions = async () => {
-        const { data, error } = await supabaseClient
-            .from('proyectos')
-            .update({ questions: questions })
-            .eq('id', projectId)
-            .single()
+        const updatePromise = Promise.resolve(
+            supabaseClient
+                .from('proyectos')
+                .update({ questions: questions })
+                .eq('id', projectId)
+                .single()
+                .then()
+        );
+
+        toast.promise(
+            updatePromise,
+            {
+                loading: 'Guardando preguntas...',
+                success: 'Preguntas guardadas con éxito',
+                error: 'Error al guardar preguntas'
+            }
+        );
+
+        const { data, error } = await updatePromise;
         console.log(data);
         console.log(questions);
     }

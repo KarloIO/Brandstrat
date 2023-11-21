@@ -234,7 +234,7 @@ export default function Home() {
 
                     <div className='w-full h-8 flex flex-row items-end justify-between'>
 
-                      <div className='w-auto h-full border-2 border-red-600'>
+                      <div className='w-auto h-full'>
 
                         <AvatarGroup isBordered max={3} renderCount={(count) => (
                           <p className="text-small font-medium ms-2 text-[#89898A]">+{count}</p>
@@ -320,7 +320,7 @@ export default function Home() {
 
                 <div className='w-full h-8 flex flex-row items-end justify-between'>
 
-                  <div className='w-auto h-full border-2 border-red-600'>
+                  <div className='w-auto h-full'>
 
                     <AvatarGroup isBordered color={undefined}>
 
