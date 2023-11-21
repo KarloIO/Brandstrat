@@ -1,11 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-body {
-  width: 100vw;
-  height: 100vh;
-  background-color: #0A0A0B;
+.descriptions {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1F1F21;
+}
+
+.descriptions.id {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1F1F21;
+  cursor: default;
+}
+
+.progress span {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: #89898A;
+}
+
+.progress div:nth-child(2) {
+  width: 100%;
+  height: 8px;
+  background-color: #EFF0F3;
+  border: 1px #89898A solid;
+}
+
+.progress div:nth-child(2) div {
+  background-color: #D0D0D0;
+}
+
+.auth {
+  background-size: 40px 40px;
+  background-image: radial-gradient(circle, #D0D0D0 1px, rgba(0, 0, 0, 0) 1px);
 }
