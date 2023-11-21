@@ -490,7 +490,7 @@ export default function Chat() {
 
                         <ScrollShadow hideScrollBar className='w-full flex flex-col gap-2' style={{ maxHeight: 'calc(100vh - 256px)' }}>
 
-                            {questions.length > 0 && questions.map((question, index) => (
+                            {questions?.length > 0 && questions.map((question, index) => (
                                 <div key={index} className="border-1 border-[#89898A] h-auto w-full flex flex-row items-start justify-between p-3 rounded-md">
                                     <span className=" text-sm font-semibold text-[#1F1F21]">{question}</span>
                                     <IconBackspaceFilled size={18} className="text-[#E7E7E8] hover:text-[#1F1F21] cursor-pointer" onClick={() => handleQuestionDelete(index)} />
