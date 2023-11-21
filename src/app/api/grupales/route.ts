@@ -9,10 +9,12 @@ import { Document } from 'langchain/document';
 import { BufferWindowMemory } from "langchain/memory";
 import pdf from 'pdf-parse/lib/pdf-parse'
 import { encode } from 'gpt-tokenizer';
+import { PromptTemplate } from "langchain/prompts";
 
 interface RequestBody {
     projectName: string;
     fileName: string;
+    question: string;
 }
 
 export const maxDuration = 300;
@@ -23,11 +25,12 @@ export const POST = async function (req: NextRequest, res: NextResponse) {
         return
     }
 
-    const { projectName, fileName } = await req.json() as RequestBody;
+    const { projectName, fileName, question } = await req.json() as RequestBody;
 
     const project = (projectName).toString();
     let respuestas: { [key: string]: { name: string, respuesta: string }[] } = {};
     let totalTokens = 0;
+    console.log(totalTokens);
 
     async function procesarArchivo(nombreArchivo: string) {
         try {
@@ -77,7 +80,7 @@ export const POST = async function (req: NextRequest, res: NextResponse) {
                 temperature: 0.0,
             });
 
-            const memory = new BufferWindowMemory({ k: 2 })
+            const memory = new BufferWindowMemory({ k: 12 })
 
             const vectorStore = await MemoryVectorStore.fromDocuments(
                 chunks,
@@ -87,35 +90,26 @@ export const POST = async function (req: NextRequest, res: NextResponse) {
             const chain = RetrievalQAChain.fromLLM(model, vectorStore.asRetriever(), memory)
 
             try {
-                const { data, error } = await supabaseClient
-                    .from('proyectos')
-                    .select('questions')
-                    .eq('id', projectName)
-                    .single()
 
-                if (error !== null) {
-                    console.error(`Error al obtener las preguntas:`, error);
-                    return;
+                console.log(`------ Procesando pregunta: ${question} ------`);
+                const template = "{question}. Please provide a detailed summary based on the document content. The summary should include key points and relevant details. Always respond in Spanish. The response should not exceed 500 characters.";
+                const prompt = new PromptTemplate({
+                    template: template,
+                    inputVariables: ["question"],
+                });
+
+                const preguntaFormateada = await prompt.format({ question: question });
+
+                const response = await chain.call({ query: preguntaFormateada });
+
+                if (!respuestas[question]) {
+                    respuestas[question] = [];
                 }
 
-                const preguntasFiltradas = data.questions.map((p: string) => ({ pregunta: p }));
+                respuestas[question].push({ name: nombreArchivo, respuesta: response.text });
 
-                console.log(preguntasFiltradas);
-
-                for (const { pregunta } of preguntasFiltradas) {
-                    console.log(`------ Procesando pregunta: ${pregunta} ------`);
-                    const preguntaGeneral = `${pregunta}. Please provide a summary based on the document content. Always respond in Spanish. not more than 500 characters`;
-                    const response = await chain.call({ query: preguntaGeneral })
-
-                    if (!respuestas[pregunta]) {
-                        respuestas[pregunta] = [];
-                    }
-
-                    respuestas[pregunta].push({ name: nombreArchivo, respuesta: response.text });
-
-                    const tokens = encode(response.text);
-                    totalTokens += tokens.length;
-                }
+                const tokens = encode(response.text);
+                totalTokens += tokens.length;
 
                 console.log(`------ Terminado con el archivo: ${nombreArchivo}. Comenzando con el siguiente archivo ------`);
 
