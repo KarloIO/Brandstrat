@@ -42,6 +42,7 @@ export default function Chat() {
     const [project, setProject] = useState<Project | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [table, isTableFinished] = useState(false);
+    const [tableReady, setTableReady] = useState(false)
     const [filesOpen, setFilesOpen] = useState(false);
     const [files, setFiles] = useState<FileWithId[]>([]);
     const [completedFiles, setCompletedFiles] = useState<number[]>([]);
@@ -78,6 +79,7 @@ export default function Chat() {
     const handleModalData = (data: any) => {
         setTableData(data);
         isTableFinished(true);
+        setTableReady(true)
     }
 
     function getTipoAnalisis(type: string | undefined): "grupales" | "profundidad" {
@@ -329,7 +331,7 @@ export default function Chat() {
                         <DropdownMenu aria-label='menu'>
                             <DropdownItem aria-label='files' key='files' startContent={<IconFiles />} className="custom-dropdown-item rounded" onClick={() => handleFiles(projectId)}>Archivos</DropdownItem>
                             <DropdownItem aria-label='questions' key='questions' startContent={<IconQuestionMark />} className="custom-dropdown-item rounded" onClick={() => handleQuestions()}>Preguntas</DropdownItem>
-                            <DropdownItem isDisabled={!table} aria-label='table' key='table' startContent={<IconColumns />} className="custom-dropdown-item rounded" onClick={exportExcel}>Descargar Tabla</DropdownItem>
+                            <DropdownItem isDisabled={!tableReady} aria-label='table' key='table' startContent={<IconColumns />} className="custom-dropdown-item rounded" onClick={exportExcel}>Descargar Tabla</DropdownItem>
                             <DropdownItem aria-label='access' key='access' startContent={<IconUsersGroup />} className="custom-dropdown-item rounded">Accesos</DropdownItem>
                             <DropdownItem aria-label='delete' key='delete' startContent={<IconTrash />} className="custom-dropdown-item rounded" >Eliminar</DropdownItem>
                         </DropdownMenu>
