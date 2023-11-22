@@ -2,9 +2,6 @@
 import { useState, useEffect } from 'react';
 import { Modal, Progress, ModalContent, ModalBody, ModalHeader, Button } from '@nextui-org/react';
 
-// import Profundidad from '@/components/pf';
-// import Grupales from '@/components/gp';
-
 import supabaseClient from '@/lib/supabase';
 
 interface ModalInteractiveProps {
@@ -29,15 +26,18 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
 
     const [modalText, setModalText] = useState("Analizando Información");
     const [showButton, setShowButton] = useState(false);
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
     const agregarRespuesta = (nombreArchivo: string, pregunta: string, nuevasRespuestas: { name: string, respuesta: string }[]) => {
         if (!respuestas[pregunta]) {
             respuestas[pregunta] = [];
         }
 
-        nuevasRespuestas.forEach((nuevaRespuesta) => {
-            respuestas[pregunta].push({ ...nuevaRespuesta, nombreArchivo });
-        });
+        if (Array.isArray(nuevasRespuestas)) {
+            nuevasRespuestas.forEach((nuevaRespuesta) => {
+                respuestas[pregunta].push({ ...nuevaRespuesta, nombreArchivo });
+            });
+        }
     };
 
     useEffect(() => {
@@ -69,13 +69,13 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
             setProgress(10);
             setArchivoActual("Analizando Información");
             setModalText(`Analizando ${archivoActual}`);
-
+    
             const fetchProjectNames = async () => {
                 const { data, error } = await supabaseClient
                     .storage
                     .from(projectName)
                     .list()
-
+    
                 if (error || !data || data.length === 0) {
                     console.error('Error al obtener nombres de proyectos:', error);
                     setModalText('No hay archivos en el proyecto');
@@ -86,23 +86,24 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
                     console.log(data);
                     const filteredData = data?.filter(archivo => archivo.name !== 'questions');
                     const totalFiles = filteredData?.length || 0;
-
+    
                     if (totalFiles === 0) {
                         setModalText('No hay preguntas para leer');
                         setShowButton(true);
                         setHasError(true);
-                        onModalData('No hay preguntas en el proyecto')
+                        onModalData('No hay preguntas en el proyecto');
                     } else if (filteredData) {
                         for (let index = 0; index < filteredData.length; index++) {
                             const archivo = filteredData[index];
                             setArchivoActual(`Analizando ${archivo.name}`);
                             setModalText(`Analizando ${archivo.name}`);
-                    
+    
                             if (questions) {
-                                for (let questionIndex = 0; questionIndex < questions.length; questionIndex++) {
-                                    const question = questions[questionIndex];
-                    
-                                    const funcionAnalisis = async (projectName: string, fileName: string, question: string) => {
+                                let currentQuestionIndex = 0;
+                                while (currentQuestionIndex < questions.length) {
+                                    const questionGroup = questions.slice(currentQuestionIndex, currentQuestionIndex + 4);
+    
+                                    const funcionAnalisis = async (projectName: string, fileName: string, questionGroup: Question[]) => {
                                         if (tipoAnalisis === 'grupales') {
                                             const response = await fetch('/api/grupales', {
                                                 method: 'POST',
@@ -112,14 +113,14 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
                                                 body: JSON.stringify({
                                                     projectName: projectName,
                                                     fileName: fileName,
-                                                    question: question,
+                                                    questions: questionGroup,
                                                 }),
                                             });
-                    
+    
                                             if (!response.ok) {
                                                 throw new Error('Error en la solicitud HTTP');
                                             }
-                    
+    
                                             return await response.json();
                                         } else if (tipoAnalisis === 'profundidad') {
                                             const response = await fetch('/api/profundidad', {
@@ -130,31 +131,30 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
                                                 body: JSON.stringify({
                                                     projectName: projectName,
                                                     fileName: fileName,
-                                                    question: question,
+                                                    questions: questionGroup,
                                                 }),
                                             });
-                    
+    
                                             if (!response.ok) {
                                                 throw new Error('Error en la solicitud HTTP');
                                             }
-                    
+    
                                             return await response.json();
                                         }
                                     };
-                    
-                                    if (funcionAnalisis) {
-                                        await funcionAnalisis(projectName, archivo.name, question.text).then(respuestasRecibidas => {
-                                            for (let pregunta in respuestasRecibidas) {
-                                                agregarRespuesta(archivo.name, pregunta, respuestasRecibidas[pregunta]);
-                                            }
-                                            setProgress((index + 1) / totalFiles * 100);
+    
+                                    const response = await funcionAnalisis(projectName, archivo.name, questionGroup);
+                                    if (response) {
+                                        const respuestasPregunta = await response;
+                                        questionGroup.forEach((question, i) => {
+                                            agregarRespuesta(archivo.name, question.text, respuestasPregunta[i]);
                                         });
                                     } else {
-                                        console.error('funcionAnalisis es undefined');
-                                        setModalText('Error: funcionAnalisis es undefined');
-                                        setShowButton(true);
-                                        setHasError(true);
+                                        console.error('Error al obtener las respuestas:', error);
                                     }
+    
+                                    setProgress((index + 1) / totalFiles * 100);
+                                    currentQuestionIndex += 4;
                                 }
                             }
                         }
@@ -166,7 +166,7 @@ export default function ModalInteractive({ isOpen, projectName, onModalData, tip
                     }
                 }
             };
-
+    
             fetchProjectNames();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
